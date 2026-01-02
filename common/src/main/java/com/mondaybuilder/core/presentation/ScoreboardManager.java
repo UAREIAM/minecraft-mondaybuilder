@@ -38,7 +38,7 @@ public class ScoreboardManager {
 
         GameManager gm = GameManager.getInstance();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            int score = scoring.getScore(player.getUUID());
+            int score = scoring.getScore(player);
             String color = gm.getPlayerColorHex(player.getUUID());
             String displayName = color + player.getScoreboardName();
             scoreboard.getOrCreatePlayerScore(ScoreHolder.forNameOnly(displayName), objective).set(score);

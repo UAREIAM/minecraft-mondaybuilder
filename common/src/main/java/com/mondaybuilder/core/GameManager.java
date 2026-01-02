@@ -86,7 +86,7 @@ public class GameManager {
 
     public void startNewGame(MinecraftServer server, int rounds) {
         this.totalRounds = rounds;
-        this.scoring.clearScores();
+        this.scoring.clearScores(server);
         this.scoreboard.initScoreboard(server);
         players.forEach(uuid -> {
             ServerPlayer p = server.getPlayerList().getPlayer(uuid);
@@ -123,8 +123,8 @@ public class GameManager {
 
         scoreboard.updateScoreboard(server);
         arena.cleanupStage(server);
-
-        UUID builderUuid = selectNextBuilder(roundNum);
+        
+        UUID builderUuid = selectNextBuilder(server, roundNum);
         ServerPlayer builder = server.getPlayerList().getPlayer(builderUuid);
         
         // Initial round context with dummy word/category to establish builder
@@ -146,8 +146,8 @@ public class GameManager {
         }
     }
 
-    private UUID selectNextBuilder(int roundNum) {
-        if (roundNum == 1 || scoring.getScores().isEmpty()) {
+    private UUID selectNextBuilder(MinecraftServer server, int roundNum) {
+        if (roundNum == 1 || scoring.getScores(server).isEmpty()) {
             return players.get(new Random().nextInt(players.size()));
         }
         
@@ -155,7 +155,8 @@ public class GameManager {
         List<UUID> candidates = new ArrayList<>();
         
         for (UUID uuid : players) {
-            int score = scoring.getScore(uuid);
+            ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+            int score = p != null ? scoring.getScore(p) : 0;
             if (score > maxScore) {
                 maxScore = score;
                 candidates.clear();
@@ -291,7 +292,7 @@ public class GameManager {
     private void handleWinner(ServerPlayer winner) {
         currentRound = currentRound.withWinnerFound();
         int points = scoring.calculate(new GuessContext(winner.getUUID(), gameTimer.getTicksRemaining(), 60 * 20, scoring.getStreak(winner.getUUID())));
-        scoring.addScore(winner.getUUID(), points);
+        scoring.addScore(winner, points);
         scoring.incrementStreak(winner.getUUID());
         scoring.grantAdvancement(((ServerLevel)winner.level()).getServer(), winner, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "correct_guess"));
         

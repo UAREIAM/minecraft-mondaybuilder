@@ -43,7 +43,7 @@ public class NotificationService {
             broadcastMessage(server, Component.literal("Game Over!").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
             
             GameManager gm = GameManager.getInstance();
-            UUID winnerId = gm.getScoring().getWinner();
+            UUID winnerId = gm.getScoring().getWinner(server);
             String winnerName = "None";
             int color = 0xFFFFFF;
             if (winnerId != null) {

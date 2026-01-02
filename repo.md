@@ -1,36 +1,43 @@
 # Montagsmaler (MondayBuilder) Repository
 
-This repository contains the source code for the **Montagsmaler** (MondayBuilder) Minecraft mod, a Pictionary-style game implemented for Minecraft 1.21.10 using the **Architectury** framework and **Fabric** loader.
+This repository contains the source code for the **Montagsmaler** (MondayBuilder) Minecraft mod, a Pictionary-style game for Minecraft 1.21.10 using the **Architectury** framework and **Fabric** loader.
 
 ## Project Structure
 
-- **`.zencoder/docs`**: Contains the documentation and concept as well as development conceptual docs.
-- **`common/`**: Contains the core mod logic shared across all platforms.
+- **`.zencoder/`**: Contains AI assistant configuration, documentation, and development rules.
+- **`common/`**: The core mod logic shared across all platforms.
   - **`src/main/java/com/mondaybuilder/`**:
-    - `MondayBuilder.java`: Main mod entry point and event registration.
-    - `core/GameManager.java`: Core game logic, managing rounds, scores, and game states.
-    - `commands/ModCommands.java`: Registration and handling of mod commands.
-    - `config/ConfigManager.java`: Configuration management for mod settings.
-    - `events/ModEvents.java`: Custom event definitions for game-specific triggers.
+    - `MondayBuilder.java`: Main entry point and event registration.
+    - **`commands/`**: Command handling (`ModCommands.java`).
+    - **`config/`**: Configuration management (`ConfigManager.java`, `ModConfig.java`).
+    - **`core/`**:
+      - **`env/`**: World and arena management (`ArenaManager.java`, `BlockInteractionManager.java`).
+      - **`mechanics/`**: Game logic mechanics (`GameTimer.java`, `ScoringSystem.java`).
+      - **`presentation/`**: UI and player feedback (`NotificationService.java`, `ScoreboardManager.java`, `CategorySelectionUI.java`).
+      - **`session/`**: Game session data (`RoundContext.java`, `WordProvider.java`, `WordCategory.java`).
+      - `GameManager.java`: Orchestrates the game lifecycle.
+      - `GameState.java`: Defines possible game states.
+    - **`events/`**: Event listeners and definitions (`ModEvents.java`).
+    - **`registry/`**: Mod registry entries (`ModSounds.java`).
 - **`fabric/`**: Fabric-specific implementation and resources.
-- **`mondaybuilder/`**: Additional subproject or tool (boilerplate implementation).
+- **`gradle/`**: Gradle wrapper and build configuration.
 
-## Core Features
+## Key Features
 
-- **Game Management**: A central `GameManager` handles the game lifecycle, including lobby, round transitions, and winner detection.
-- **Role System**: Players are assigned roles such as "builder" and "guesser".
-- **Event-Driven Architecture**: Uses Architectury's event system to hook into Minecraft's lifecycle (chat, block placement/breaking, player join/quit).
-- **Configuration**: Customizable settings through a `ModConfig` system.
+- **Game Orchestration**: `GameManager` manages transitions between Lobby, Round, and Game Over states.
+- **Arena Management**: `ArenaManager` handles arena setup, player teleportation, and world boundaries.
+- **Scoring & Roles**: Dynamic role assignment (Builder/Guesser) and a sophisticated `ScoringSystem`.
+- **UI & Feedback**: Custom scoreboards, title notifications, and category selection menus.
+- **Word Management**: `WordProvider` serves words from configurable categories.
+- **Interactions**: `BlockInteractionManager` controls where and how players can build during rounds.
 
 ## Build and Run
-
-The project uses Gradle for build management.
 
 - **Compile**: `./gradlew classes`
 - **Run Fabric Client**: `./gradlew :fabric:runClient`
 - **Run Fabric Server**: `./gradlew :fabric:runServer`
 
-## Dependencies
+## Dependencies (v1.0.0)
 
 - **Minecraft**: 1.21.10
 - **Architectury API**: 18.0.6

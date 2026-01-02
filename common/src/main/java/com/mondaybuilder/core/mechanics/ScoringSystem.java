@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.*;
 
 public class ScoringSystem {
-    private final Map<UUID, Integer> scores = new HashMap<>();
     private final Map<UUID, Integer> guessStreaks = new HashMap<>();
 
     public int calculate(GuessContext context) {
@@ -21,16 +20,16 @@ public class ScoringSystem {
         else if (elapsedSeconds <= 45) basePoints = 10;
         else basePoints = 5;
 
-        // Apply streak bonus (planned in REFACTOR_PLAN but not fully detailed, let's add a simple one)
+        // Apply streak bonus
         return basePoints + (context.currentStreak() * 2);
     }
 
-    public void addScore(UUID player, int points) {
-        scores.put(player, scores.getOrDefault(player, 0) + points);
+    public void addScore(ServerPlayer player, int points) {
+        player.setExperienceLevels(player.experienceLevel + points);
     }
 
-    public int getScore(UUID player) {
-        return scores.getOrDefault(player, 0);
+    public int getScore(ServerPlayer player) {
+        return player.experienceLevel;
     }
 
     public void incrementStreak(UUID player) {
@@ -45,8 +44,12 @@ public class ScoringSystem {
         return guessStreaks.getOrDefault(player, 0);
     }
 
-    public void clearScores() {
-        scores.clear();
+    public void clearScores(MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            player.setExperienceLevels(0);
+            player.setExperiencePoints(0);
+            player.totalExperience = 0;
+        }
     }
 
     public void clearStreaks() {
@@ -104,14 +107,18 @@ public class ScoringSystem {
         }
     }
 
-    public Map<UUID, Integer> getScores() {
+    public Map<UUID, Integer> getScores(MinecraftServer server) {
+        Map<UUID, Integer> scores = new HashMap<>();
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            scores.put(player.getUUID(), player.experienceLevel);
+        }
         return scores;
     }
 
-    public UUID getWinner() {
-        return scores.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
+    public UUID getWinner(MinecraftServer server) {
+        return server.getPlayerList().getPlayers().stream()
+                .max(Comparator.comparingInt(p -> p.experienceLevel))
+                .map(ServerPlayer::getUUID)
                 .orElse(null);
     }
 }
