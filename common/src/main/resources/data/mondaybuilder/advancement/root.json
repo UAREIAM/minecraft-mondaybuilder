@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:white_wool"
+    },
+    "title": {
+      "text": "Monday Builder"
+    },
+    "description": {
+      "text": "Welcome to the game!"
+    },
+    "background": "minecraft:block/stone",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "player_join": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:player_join"
+    ]
+  },
+  "round_start": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:round_start"
+    ]
+  },
+  "round_end": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:round_end"
+    ]
+  },
+  "guess_right": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:guess_right"
+    ]
+  },
+  "guesser_prepare_tick": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:guesser_prepare_tick"
+    ]
+  },
+  "60s_second_default": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:60s_second_default"
+    ]
+  },
+  "60s_second_pitched": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:60s_second_pitched"
+    ]
+  }
+}

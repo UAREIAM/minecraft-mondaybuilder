@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:correct_guess",
+  "display": {
+    "icon": {
+      "id": "minecraft:gold_ingot"
+    },
+    "title": {
+      "text": "Hat-trick!"
+    },
+    "description": {
+      "text": "3 right guesses in a row"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:paper"
+    },
+    "title": {
+      "text": "Correct Guess!"
+    },
+    "description": {
+      "text": "You found the word!"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

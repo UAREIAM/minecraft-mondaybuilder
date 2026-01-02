@@ -1,0 +1,10 @@
+package com.mondaybuilder.core;
+
+public enum GameState {
+    LOBBY,
+    PREPARING,
+    SHOWING_WORD,
+    BUILDING,
+    ROUND_END,
+    GAME_END
+}

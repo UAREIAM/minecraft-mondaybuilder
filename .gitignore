@@ -1,0 +1,15 @@
+.gradle
+.editorconfig
+
+TODO.md
+
+build/
+out/
+
+/external_sources/
+
+/fabric/run/
+/fabric/build/
+/fabric/.gradle/
+
+*todo*
