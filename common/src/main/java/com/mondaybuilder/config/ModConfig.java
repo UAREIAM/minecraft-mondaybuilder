@@ -57,8 +57,8 @@ public class ModConfig {
 
         public Area joiningArea = new Area("minecraft:overworld", 39, 0, 39, 49, 0, 49);
         public Area lobbyArea = new Area("draft:end", -9, 43, -9, 9, 47, 9);
-        public Area arenaArea = new Area("draft:end", -19, 50, -19, 19, 60, 19);
-        public Area stageArea = new Area("draft:end", -7, 50, -7, 7, 60, 7);
+        public Area arenaArea = new Area("draft:end", -19, 50, -19, 19, 61, 19);
+        public Area stageArea = new Area("draft:end", -7, 50, -7, 7, 61, 7);
         public Location stage = new Location("draft:end", 0, 50, 0);
 
         public Location actionBlock = new Location("minecraft:overworld", 44, 1, 44);
@@ -69,20 +69,6 @@ public class ModConfig {
         public int maxPlayers = 15;
         public boolean miniGamesEnabled = true;
         public boolean autoOpInTest = true;
-    }
-
-    public static class BlockEntry {
-        public String id;
-        public int amount;
-
-        public BlockEntry(String id, int amount) {
-            this.id = id;
-            this.amount = amount;
-        }
-    }
-
-    public static class Blocks {
-        public List<BlockEntry> pool = new ArrayList<>();
     }
 
     public static class Items {

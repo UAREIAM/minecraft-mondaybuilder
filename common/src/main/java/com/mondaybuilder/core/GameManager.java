@@ -108,8 +108,8 @@ public class GameManager {
                 ServerPlayer p = server.getPlayerList().getPlayer(uuid);
                 if (p != null) {
                     p.getInventory().clearContent();
+                    p.setGameMode(GameType.ADVENTURE); // Ensure everyone is in Adventure mode in lobby
                     arena.teleportToLobby(p);
-                    setFlying(p, false);
                     setRole(p, PlayerRole.PLAYER);
                 }
             });
@@ -183,6 +183,7 @@ public class GameManager {
                 arena.teleportToStage(p);
             } else {
                 setRole(p, PlayerRole.GUESSER);
+                p.setGameMode(GameType.ADVENTURE); // Guessers must be in Adventure mode
                 arena.teleportToArena(p);
             }
         });
@@ -205,22 +206,31 @@ public class GameManager {
 
     private void startBuilding(MinecraftServer server) {
         setState(GameState.BUILDING);
+
         players.forEach(uuid -> {
             ServerPlayer p = server.getPlayerList().getPlayer(uuid);
             if (p != null) {
-                setFlying(p, true);
+                p.setGameMode(GameType.CREATIVE); // Everyone gets Creative for native flying
+                p.getInventory().clearContent();
             }
         });
 
         ServerPlayer builder = server.getPlayerList().getPlayer(currentRound.getBuilder());
         if (builder != null) {
-            builder.setGameMode(GameType.SURVIVAL);
-            setFlying(builder, true);
-            arena.setupBoundaries((ServerLevel) builder.level());
-            
-            builder.getInventory().clearContent();
-            ConfigManager.blocks.pool.forEach(entry -> {
-                BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(entry.id)).ifPresent(item -> {
+            List<String> startingBlocks = Arrays.asList(
+                "minecraft:white_wool",
+                "minecraft:yellow_wool",
+                "minecraft:orange_wool",
+                "minecraft:pink_wool",
+                "minecraft:red_wool",
+                "minecraft:lime_wool",
+                "minecraft:light_gray_wool",
+                "minecraft:black_wool",
+                "minecraft:brown_wool"
+            );
+
+            startingBlocks.forEach(id -> {
+                BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(id)).ifPresent(item -> {
                     builder.getInventory().add(new ItemStack(item, selectedCategory.getBlockAmount()));
                 });
             });
@@ -239,7 +249,7 @@ public class GameManager {
             ServerPlayer p = server.getPlayerList().getPlayer(uuid);
             if (p != null) {
                 p.getInventory().clearContent(); // Clear ALL players inventory just in case
-                setFlying(p, false);
+                p.setGameMode(GameType.ADVENTURE); // Reset everyone to Adventure mode
             }
         });
 
@@ -262,6 +272,27 @@ public class GameManager {
         }
         if (state == GameState.LOBBY) return;
         gameTimer.tick();
+
+        // Lock inventories and sanitize if in Creative mode during building phase
+        if (state == GameState.BUILDING && currentRound != null) {
+            players.forEach(uuid -> {
+                ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+                if (p != null && p.isCreative()) {
+                    // Force close any menu to prevent using the full creative inventory screen
+                    if (p.containerMenu != p.inventoryMenu) {
+                        p.closeContainer();
+                    }
+                    
+                    // Sanitization: Remove any non-wool items. Guessers will have EVERYTHING removed.
+                    for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+                        ItemStack stack = p.getInventory().getItem(i);
+                        if (!stack.isEmpty() && !stack.getItem().getDescriptionId().contains("wool")) {
+                            p.getInventory().setItem(i, ItemStack.EMPTY);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     public void scheduleTask(Runnable task) {
@@ -272,6 +303,10 @@ public class GameManager {
 
     public void onPlayerChat(ServerPlayer player, Component message) {
         if (state != GameState.BUILDING || currentRound == null) return;
+        
+        PlayerRole role = getPlayerRole(player.getUUID());
+        if (role == PlayerRole.SPECTATOR || role == PlayerRole.BUILDER) return;
+
         if (words.isCorrect(message.getString(), currentRound.getWord())) {
             handleWinner(player);
         }
@@ -304,6 +339,7 @@ public class GameManager {
     public void addPlayer(ServerPlayer player) {
         if (players.contains(player.getUUID())) return;
         player.getInventory().clearContent();
+        player.setGameMode(GameType.ADVENTURE); // Ensure lobby players are in Adventure mode
         
         // Assign unique hex color if not present
         if (!playerColors.containsKey(player.getUUID())) {
@@ -320,28 +356,20 @@ public class GameManager {
         scoring.grantAdvancement(((ServerLevel)player.level()).getServer(), player, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "root"));
 
         players.add(player.getUUID());
-        setRole(player, PlayerRole.PLAYER); // Always start as PLAYER role
 
         if (state == GameState.LOBBY) {
+            setRole(player, PlayerRole.PLAYER);
             arena.teleportToLobby(player);
         } else {
+            setRole(player, PlayerRole.SPECTATOR);
             spectators.add(player.getUUID());
             arena.teleportToArena(player);
-            if (state == GameState.BUILDING) {
-                setFlying(player, true);
-            }
         }
     }
 
     private void setRole(ServerPlayer player, PlayerRole role) {
         playerRoles.put(player.getUUID(), role);
         ModEvents.SET_ROLE.invoker().onSetRole(player, role.name().toLowerCase());
-    }
-
-    private void setFlying(ServerPlayer player, boolean allowed) {
-        player.getAbilities().mayfly = allowed;
-        if (!allowed) player.getAbilities().flying = false;
-        player.onUpdateAbilities();
     }
 
     public int getPlayerColor(UUID uuid) {
@@ -418,13 +446,11 @@ public class GameManager {
 
     public void onPlayerRespawn(ServerPlayer player) {
         player.getInventory().clearContent();
+        player.setGameMode(GameType.ADVENTURE);
         if (state == GameState.LOBBY) {
             arena.teleportToLobby(player);
         } else {
             arena.teleportToArena(player);
-            if (state == GameState.BUILDING) {
-                setFlying(player, true);
-            }
         }
     }
 

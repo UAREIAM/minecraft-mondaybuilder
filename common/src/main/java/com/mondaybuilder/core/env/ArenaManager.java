@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import java.util.Collections;
 import java.util.Set;
 
@@ -64,7 +65,8 @@ public class ArenaManager {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
-                    if (!level.getBlockState(pos).isAir()) {
+                    BlockState state = level.getBlockState(pos);
+                    if (!state.isAir() && !state.is(Blocks.BARRIER)) {
                         level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
                     }
                 }
@@ -72,18 +74,6 @@ public class ArenaManager {
         }
     }
 
-    public void setupBoundaries(ServerLevel level) {
-        ModConfig.Area stage = ConfigManager.map.stageArea;
-        for (int x = (int)stage.x1; x <= (int)stage.x2; x++) {
-            for (int y = (int)stage.y1; y <= (int)stage.y2; y++) {
-                for (int z = (int)stage.z1; z <= (int)stage.z2; z++) {
-                    if (x == (int)stage.x1 || x == (int)stage.x2 || z == (int)stage.z1 || z == (int)stage.z2 || y == (int)stage.y2) {
-                        level.setBlockAndUpdate(new BlockPos(x, y, z), Blocks.BARRIER.defaultBlockState());
-                    }
-                }
-            }
-        }
-    }
 
     public void teleport(ServerPlayer player, ModConfig.Location loc) {
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(loc.world));

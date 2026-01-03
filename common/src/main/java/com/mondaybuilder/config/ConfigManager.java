@@ -17,18 +17,15 @@ public class ConfigManager {
 
     public static ModConfig.General general = new ModConfig.General();
     public static ModConfig.MapConfig map = new ModConfig.MapConfig();
-    public static ModConfig.Blocks blocks = new ModConfig.Blocks();
     public static ModConfig.Items items = new ModConfig.Items();
     public static ModConfig.Words words = new ModConfig.Words();
 
     public static void loadAll() {
         general = load("config.json", ModConfig.General.class, new ModConfig.General());
         map = load("map.json", ModConfig.MapConfig.class, new ModConfig.MapConfig());
-        blocks = load("blocks.json", ModConfig.Blocks.class, new ModConfig.Blocks());
         items = load("items.json", ModConfig.Items.class, new ModConfig.Items());
         
         loadWords();
-        loadBlocks();
     }
 
     private static void loadWords() {
@@ -89,20 +86,6 @@ public class ConfigManager {
             yaml.dump(data, writer);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private static void loadBlocks() {
-        // Ensure default blocks
-        if (blocks.pool.isEmpty()) {
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:white_wool", 16));
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:yellow_wool", 16));
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:orange_wool", 16));
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:pink_wool", 16));
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:red_wool", 16));
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:light_gray_wool", 16));
-            blocks.pool.add(new ModConfig.BlockEntry("minecraft:black_wool", 16));
-            save("blocks.json", blocks);
         }
     }
 

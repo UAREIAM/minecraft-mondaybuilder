@@ -10,6 +10,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class BlockInteractionManager {
     private final ArenaManager arena;
@@ -19,51 +23,85 @@ public class BlockInteractionManager {
     }
 
     public EventResult onBlockBreak(Level level, BlockPos pos, ServerPlayer player, GameState state, RoundContext currentRound) {
-        if (state != GameState.BUILDING || currentRound == null) return EventResult.pass();
-        if (!player.getUUID().equals(currentRound.getBuilder())) return EventResult.interruptFalse();
-        if (arena.isFloor(pos)) return EventResult.interruptFalse();
-
-        BlockState blockState = level.getBlockState(pos);
-        if (blockState.is(Blocks.BARRIER)) return EventResult.interruptFalse();
-
-        // Give block back to builder
-        if (!blockState.isAir()) {
-            player.getInventory().add(blockState.getBlock().asItem().getDefaultInstance());
+        if (state == GameState.BUILDING && currentRound != null && 
+            com.mondaybuilder.core.GameManager.getInstance().getPlayerRole(player.getUUID()) == com.mondaybuilder.core.session.PlayerRole.BUILDER) {
+            // ONLY the builder can break blocks, and only within the stage area
+            if (arena.isWithinStage(level, pos) && pos.getY() >= ConfigManager.map.stageArea.y1) {
+                // Faked survival behavior in Creative: increment the block count when broken
+                BlockState brokenState = level.getBlockState(pos);
+                if (brokenState.getBlock().getDescriptionId().contains("wool")) {
+                    for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                        ItemStack stack = player.getInventory().getItem(i);
+                        if (!stack.isEmpty() && stack.getItem().equals(brokenState.getBlock().asItem())) {
+                            stack.grow(1);
+                            player.getInventory().setItem(i, stack);
+                            player.containerMenu.broadcastChanges();
+                            break;
+                        }
+                    }
+                }
+                return EventResult.pass();
+            }
         }
-
-        return EventResult.pass();
+        return EventResult.interruptFalse();
     }
 
     public InteractionResult onLeftClickBlock(ServerPlayer player, BlockPos pos, GameState state, RoundContext currentRound) {
-        if (state != GameState.BUILDING || currentRound == null) return InteractionResult.PASS;
-        if (!player.getUUID().equals(currentRound.getBuilder())) return InteractionResult.PASS;
-        if (arena.isFloor(pos)) return InteractionResult.PASS;
+        if (state != GameState.BUILDING || currentRound == null) return InteractionResult.FAIL;
+        
+        // ONLY the builder can interact with blocks
+        if (com.mondaybuilder.core.GameManager.getInstance().getPlayerRole(player.getUUID()) != com.mondaybuilder.core.session.PlayerRole.BUILDER) return InteractionResult.FAIL;
+        
+        // If outside stage or below the stage floor, block it.
+        if (!arena.isWithinStage(player.level(), pos) || pos.getY() < ConfigManager.map.stageArea.y1) {
+            return InteractionResult.FAIL;
+        }
 
-        Level level = player.level();
-        BlockState blockState = level.getBlockState(pos);
-        if (blockState.isAir() || blockState.is(Blocks.BARRIER)) return InteractionResult.PASS;
-
-        player.getInventory().add(blockState.getBlock().asItem().getDefaultInstance());
-        level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-        return InteractionResult.SUCCESS;
+        // Return PASS to allow Creative mode's native instant break logic to take over.
+        // This prevents the "sweeping" bug caused by manual server-side block removal.
+        return InteractionResult.PASS;
     }
 
     public EventResult onBlockPlace(Level level, BlockPos pos, BlockState blockState, ServerPlayer player, GameState state, RoundContext currentRound) {
-        if (state != GameState.BUILDING || currentRound == null) return EventResult.pass();
-        if (!player.getUUID().equals(currentRound.getBuilder())) return EventResult.interruptFalse();
+        if (state != GameState.BUILDING || currentRound == null) return EventResult.interruptFalse();
+        if (com.mondaybuilder.core.GameManager.getInstance().getPlayerRole(player.getUUID()) != com.mondaybuilder.core.session.PlayerRole.BUILDER) return EventResult.interruptFalse();
         
         // Ensure building is ONLY allowed while the round timer is actually running
         if (!currentRound.getTimer().isRunning()) {
             return EventResult.interruptFalse();
         }
 
-        // Allow building ONLY within the stage area (including the floor Y level)
+        // Allow building ONLY within the stage area (including the floor Y level for placing ON it)
         if (!arena.isWithinStage(level, pos)) {
              return EventResult.interruptFalse();
         }
         
-        if (!level.getBlockState(pos).isAir()) return EventResult.interruptFalse();
+        // Restriction: ONLY allow Wool blocks to be placed to prevent Creative inventory abuse.
+        if (!blockState.getBlock().getDescriptionId().contains("wool")) {
+            return EventResult.interruptFalse();
+        }
 
-        return EventResult.pass();
+        // Faked survival behavior in Creative: decrement the block count when placed
+        // In Creative mode, vanilla restores the item stack after placement, so we must shrink it in the next tick.
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (!stack.isEmpty() && stack.getItem().equals(blockState.getBlock().asItem())) {
+                final int slot = i;
+                final net.minecraft.world.item.Item expectedItem = stack.getItem();
+                
+                com.mondaybuilder.core.GameManager.getInstance().scheduleTask(() -> {
+                    ItemStack currentStack = player.getInventory().getItem(slot);
+                    if (!currentStack.isEmpty() && currentStack.getItem().equals(expectedItem)) {
+                        currentStack.shrink(1);
+                        player.getInventory().setItem(slot, currentStack);
+                        player.containerMenu.broadcastChanges();
+                    }
+                });
+                return EventResult.pass();
+            }
+        }
+
+        // If for some reason the block isn't in their inventory, don't let them place it
+        return EventResult.interruptFalse();
     }
 }
