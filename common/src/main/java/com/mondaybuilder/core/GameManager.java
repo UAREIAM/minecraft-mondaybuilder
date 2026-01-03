@@ -382,11 +382,39 @@ public class GameManager {
     }
 
     public void removePlayer(UUID uuid, MinecraftServer server) {
+        PlayerRole role = getPlayerRole(uuid);
         players.remove(uuid);
         spectators.remove(uuid);
         playerRoles.remove(uuid);
         if (uuid.equals(gameMaster)) {
             gameMaster = players.isEmpty() ? null : players.get(0);
+        }
+
+        if (players.isEmpty()) {
+            if (state != GameState.LOBBY) {
+                setState(GameState.LOBBY);
+                gameTimer.stop();
+                arena.cleanupStage(server);
+            }
+            return;
+        }
+
+        if (role == PlayerRole.BUILDER) {
+            handleBuilderLeft(server);
+        }
+    }
+
+    private void handleBuilderLeft(MinecraftServer server) {
+        if (state == GameState.LOBBY || state == GameState.GAME_END) return;
+
+        if (state == GameState.PREPARING || state == GameState.SHOWING_WORD || state == GameState.BUILDING) {
+            gameTimer.stop();
+            notify.broadcastMessage(server, Component.literal("The builder left the game. Restarting round " + currentRound.getRoundNumber() + "...").withStyle(net.minecraft.ChatFormatting.RED));
+            nextRound(server, currentRound.getRoundNumber());
+        } else if (state == GameState.ROUND_END) {
+            gameTimer.stop();
+            notify.broadcastMessage(server, Component.literal("The builder left the game. Starting next round...").withStyle(net.minecraft.ChatFormatting.RED));
+            nextRound(server, currentRound.getRoundNumber() + 1);
         }
     }
 }
