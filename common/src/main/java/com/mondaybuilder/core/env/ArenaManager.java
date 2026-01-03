@@ -15,9 +15,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ArenaManager {
+    private final Set<BlockPos> placedBlocks = new HashSet<>();
 
     public void onServerStarted(MinecraftServer server) {
         ModConfig.Area area = ConfigManager.map.joiningArea;
@@ -47,11 +49,36 @@ public class ArenaManager {
         }
     }
 
+    public void addPlacedBlock(BlockPos pos) {
+        placedBlocks.add(pos.immutable());
+    }
+
+    public void removePlacedBlock(BlockPos pos) {
+        placedBlocks.remove(pos);
+    }
+
+    public void clearPlacedBlocks() {
+        placedBlocks.clear();
+    }
+
     public void cleanupStage(MinecraftServer server) {
         ModConfig.Area stage = ConfigManager.map.stageArea;
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(stage.world));
         ServerLevel level = server.getLevel(worldKey);
         if (level == null) return;
+
+        // If we have tracked blocks, clear ONLY those for maximum performance
+        if (!placedBlocks.isEmpty()) {
+            for (BlockPos pos : placedBlocks) {
+                if (level.getBlockState(pos).isAir()) continue;
+                // Use flag 2 (UPDATE_CLIENTS) to avoid neighbor updates and lighting re-calculations for every single block
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+            }
+            placedBlocks.clear();
+            // Final update to sync all changes to clients
+            level.getChunkSource().getLightEngine().checkBlock(new BlockPos(0,0,0)); // Dummy trigger or rely on flag 2
+            return;
+        }
 
         int minX = (int) Math.min(stage.x1, stage.x2);
         int maxX = (int) Math.max(stage.x1, stage.x2);
@@ -60,14 +87,15 @@ public class ArenaManager {
         int minZ = (int) Math.min(stage.z1, stage.z2);
         int maxZ = (int) Math.max(stage.z1, stage.z2);
 
-        // Clear EVERYTHING within the stage area including the base Y level (y1)
+        // Fallback: Clear EVERYTHING within the stage area (legacy/failsafe)
+        // This is only called if tracking was lost or at first round start
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState state = level.getBlockState(pos);
                     if (!state.isAir() && !state.is(Blocks.BARRIER)) {
-                        level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                     }
                 }
             }

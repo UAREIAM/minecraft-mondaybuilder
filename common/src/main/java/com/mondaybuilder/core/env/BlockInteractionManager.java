@@ -27,6 +27,7 @@ public class BlockInteractionManager {
             com.mondaybuilder.core.GameManager.getInstance().getPlayerRole(player.getUUID()) == com.mondaybuilder.core.session.PlayerRole.BUILDER) {
             // ONLY the builder can break blocks, and only within the stage area
             if (arena.isWithinStage(level, pos) && pos.getY() >= ConfigManager.map.stageArea.y1) {
+                arena.removePlacedBlock(pos);
                 // Faked survival behavior in Creative: increment the block count when broken
                 BlockState brokenState = level.getBlockState(pos);
                 if (brokenState.getBlock().getDescriptionId().contains("wool")) {
@@ -75,6 +76,8 @@ public class BlockInteractionManager {
         if (!arena.isWithinStage(level, pos)) {
              return EventResult.interruptFalse();
         }
+
+        arena.addPlacedBlock(pos);
         
         // Restriction: ONLY allow Wool blocks to be placed to prevent Creative inventory abuse.
         if (!blockState.getBlock().getDescriptionId().contains("wool")) {

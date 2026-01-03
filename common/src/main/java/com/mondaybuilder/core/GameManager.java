@@ -73,6 +73,7 @@ public class GameManager {
     private int totalRounds = 10;
     private UUID gameMaster;
     private WordCategory selectedCategory = WordCategory.EASY;
+    private int tickCounter = 0;
 
     private GameManager() {
         notify.registerListeners();
@@ -86,6 +87,7 @@ public class GameManager {
 
     public void startNewGame(MinecraftServer server, int rounds) {
         this.totalRounds = rounds;
+        this.arena.clearPlacedBlocks();
         this.scoring.clearScores(server);
         this.scoreboard.initScoreboard(server);
         players.forEach(uuid -> {
@@ -174,9 +176,10 @@ public class GameManager {
     }
 
     private void preparePlayersForRound(MinecraftServer server) {
-        players.forEach(uuid -> {
-            ServerPlayer p = server.getPlayerList().getPlayer(uuid);
-            if (p == null) return;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            UUID uuid = p.getUUID();
+            if (!players.contains(uuid)) continue;
+            
             p.getInventory().clearContent();
             if (uuid.equals(currentRound.getBuilder())) {
                 setRole(p, PlayerRole.BUILDER);
@@ -186,7 +189,7 @@ public class GameManager {
                 p.setGameMode(GameType.ADVENTURE); // Guessers must be in Adventure mode
                 arena.teleportToArena(p);
             }
-        });
+        }
     }
 
     private void startShowingWord(MinecraftServer server) {
@@ -207,16 +210,20 @@ public class GameManager {
     private void startBuilding(MinecraftServer server) {
         setState(GameState.BUILDING);
 
-        players.forEach(uuid -> {
-            ServerPlayer p = server.getPlayerList().getPlayer(uuid);
-            if (p != null) {
+        ServerPlayer builder = null;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (players.contains(p.getUUID())) {
                 p.setGameMode(GameType.CREATIVE); // Everyone gets Creative for native flying
                 p.getInventory().clearContent();
+                
+                if (p.getUUID().equals(currentRound.getBuilder())) {
+                    builder = p;
+                }
             }
-        });
+        }
 
-        ServerPlayer builder = server.getPlayerList().getPlayer(currentRound.getBuilder());
-        if (builder != null) {
+        final ServerPlayer finalBuilder = builder;
+        if (finalBuilder != null) {
             List<String> startingBlocks = Arrays.asList(
                 "minecraft:white_wool",
                 "minecraft:yellow_wool",
@@ -231,7 +238,7 @@ public class GameManager {
 
             startingBlocks.forEach(id -> {
                 BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(id)).ifPresent(item -> {
-                    builder.getInventory().add(new ItemStack(item, selectedCategory.getBlockAmount()));
+                    finalBuilder.getInventory().add(new ItemStack(item, selectedCategory.getBlockAmount()));
                 });
             });
         }
@@ -245,13 +252,12 @@ public class GameManager {
         setState(GameState.ROUND_END);
         ModEvents.ROUND_END.invoker().onRoundChange(server, currentRound.getRoundNumber());
         
-        players.forEach(uuid -> {
-            ServerPlayer p = server.getPlayerList().getPlayer(uuid);
-            if (p != null) {
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (players.contains(p.getUUID())) {
                 p.getInventory().clearContent(); // Clear ALL players inventory just in case
                 p.setGameMode(GameType.ADVENTURE); // Reset everyone to Adventure mode
             }
-        });
+        }
 
         arena.cleanupStage(server); // Clear stage at round end
         
@@ -273,25 +279,28 @@ public class GameManager {
         if (state == GameState.LOBBY) return;
         gameTimer.tick();
 
-        // Lock inventories and sanitize if in Creative mode during building phase
-        if (state == GameState.BUILDING && currentRound != null) {
-            players.forEach(uuid -> {
-                ServerPlayer p = server.getPlayerList().getPlayer(uuid);
-                if (p != null && p.isCreative()) {
-                    // Force close any menu to prevent using the full creative inventory screen
-                    if (p.containerMenu != p.inventoryMenu) {
-                        p.closeContainer();
-                    }
-                    
-                    // Sanitization: Remove any non-wool items. Guessers will have EVERYTHING removed.
-                    for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-                        ItemStack stack = p.getInventory().getItem(i);
-                        if (!stack.isEmpty() && !stack.getItem().getDescriptionId().contains("wool")) {
-                            p.getInventory().setItem(i, ItemStack.EMPTY);
+        // Throttled logic: only run every 10 ticks (0.5 seconds) to save CPU
+        if (tickCounter++ % 10 == 0) {
+            // Lock inventories and sanitize if in Creative mode during building phase
+            if (state == GameState.BUILDING && currentRound != null) {
+                for (UUID uuid : players) {
+                    ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+                    if (p != null && p.isCreative()) {
+                        // Force close any menu to prevent using the full creative inventory screen
+                        if (p.containerMenu != p.inventoryMenu) {
+                            p.closeContainer();
+                        }
+                        
+                        // Sanitization: Remove any non-wool items. Guessers will have EVERYTHING removed.
+                        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+                            ItemStack stack = p.getInventory().getItem(i);
+                            if (!stack.isEmpty() && !stack.getItem().getDescriptionId().contains("wool")) {
+                                p.getInventory().setItem(i, ItemStack.EMPTY);
+                            }
                         }
                     }
                 }
-            });
+            }
         }
     }
 
