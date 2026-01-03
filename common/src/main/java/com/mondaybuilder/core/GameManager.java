@@ -348,6 +348,9 @@ public class GameManager {
     }
 
     public UUID getGameMaster() {
+        if (gameMaster == null && !players.isEmpty()) {
+            gameMaster = players.get(0);
+        }
         return gameMaster;
     }
 
@@ -360,10 +363,10 @@ public class GameManager {
     }
 
     public void onPlayerJoinServer(ServerPlayer player) {
+        addPlayer(player);
         if (gameMaster == null) {
             gameMaster = player.getUUID();
         }
-        addPlayer(player);
         ModEvents.PLAYER_JOIN_GAME.invoker().onGameEvent(player);
     }
 

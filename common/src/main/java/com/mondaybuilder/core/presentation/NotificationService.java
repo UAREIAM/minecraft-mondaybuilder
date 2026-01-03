@@ -35,7 +35,12 @@ public class NotificationService {
                 
                 Component playerName = colored(player.getName().getString(), color);
                 broadcastMessage(server, Component.empty().append(playerName).append(Component.literal(" joined the game!").withStyle(ChatFormatting.YELLOW)));
-                player.sendSystemMessage(Component.literal("Welcome ").append(playerName).append(Component.literal("! Have fun and enjoy the game.").withStyle(ChatFormatting.GREEN)), false);
+                
+                if (player.getUUID().equals(gm.getGameMaster())) {
+                    player.sendSystemMessage(Component.literal("Welcome ").append(playerName).append(Component.literal("! You are the §6Game Master§a. Have fun!").withStyle(ChatFormatting.GREEN)), false);
+                } else {
+                    player.sendSystemMessage(Component.literal("Welcome ").append(playerName).append(Component.literal("! Have fun and enjoy the game.").withStyle(ChatFormatting.GREEN)), false);
+                }
             }
         });
 
