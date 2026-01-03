@@ -8,11 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class BlockInteractionManager {
@@ -31,13 +28,19 @@ public class BlockInteractionManager {
                 // Faked survival behavior in Creative: increment the block count when broken
                 BlockState brokenState = level.getBlockState(pos);
                 if (brokenState.getBlock().getDescriptionId().contains("wool")) {
-                    for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-                        ItemStack stack = player.getInventory().getItem(i);
-                        if (!stack.isEmpty() && stack.getItem().equals(brokenState.getBlock().asItem())) {
-                            stack.grow(1);
-                            player.getInventory().setItem(i, stack);
-                            player.containerMenu.broadcastChanges();
-                            break;
+                    ItemStack mainHand = player.getMainHandItem();
+                    if (!mainHand.isEmpty() && mainHand.getItem().equals(brokenState.getBlock().asItem())) {
+                        mainHand.grow(1);
+                        player.containerMenu.broadcastChanges();
+                    } else {
+                        // Fallback to inventory scan ONLY if not in main hand
+                        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                            ItemStack stack = player.getInventory().getItem(i);
+                            if (!stack.isEmpty() && stack.getItem().equals(brokenState.getBlock().asItem())) {
+                                stack.grow(1);
+                                player.containerMenu.broadcastChanges();
+                                break;
+                            }
                         }
                     }
                 }
@@ -76,30 +79,27 @@ public class BlockInteractionManager {
         if (!arena.isWithinStage(level, pos)) {
              return EventResult.interruptFalse();
         }
-
-        arena.addPlacedBlock(pos);
         
         // Restriction: ONLY allow Wool blocks to be placed to prevent Creative inventory abuse.
         if (!blockState.getBlock().getDescriptionId().contains("wool")) {
             return EventResult.interruptFalse();
         }
 
+        arena.addPlacedBlock(pos);
+
         // Faked survival behavior in Creative: decrement the block count when placed
         // In Creative mode, vanilla restores the item stack after placement, so we must shrink it in the next tick.
+        ItemStack mainHand = player.getMainHandItem();
+        if (!mainHand.isEmpty() && mainHand.getItem().equals(blockState.getBlock().asItem())) {
+            com.mondaybuilder.core.GameManager.getInstance().getInventoryManager().queueShrink(player, mainHand.getItem());
+            return EventResult.pass();
+        }
+
+        // Fallback to inventory scan ONLY if not in main hand
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if (!stack.isEmpty() && stack.getItem().equals(blockState.getBlock().asItem())) {
-                final int slot = i;
-                final net.minecraft.world.item.Item expectedItem = stack.getItem();
-                
-                com.mondaybuilder.core.GameManager.getInstance().scheduleTask(() -> {
-                    ItemStack currentStack = player.getInventory().getItem(slot);
-                    if (!currentStack.isEmpty() && currentStack.getItem().equals(expectedItem)) {
-                        currentStack.shrink(1);
-                        player.getInventory().setItem(slot, currentStack);
-                        player.containerMenu.broadcastChanges();
-                    }
-                });
+                com.mondaybuilder.core.GameManager.getInstance().getInventoryManager().queueShrink(player, stack.getItem());
                 return EventResult.pass();
             }
         }

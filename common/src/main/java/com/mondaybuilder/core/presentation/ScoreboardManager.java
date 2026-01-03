@@ -27,7 +27,7 @@ public class ScoreboardManager {
         if (objective != null) {
             scoreboard.removeObjective(objective);
         }
-        objective = scoreboard.addObjective(OBJECTIVE_NAME, ObjectiveCriteria.DUMMY, Component.literal("§6§lMONTAGSMALER"), ObjectiveCriteria.RenderType.INTEGER, true, null);
+        objective = scoreboard.addObjective(OBJECTIVE_NAME, ObjectiveCriteria.DUMMY, Component.literal("§6Score Board"), ObjectiveCriteria.RenderType.INTEGER, true, null);
         scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
     }
 

@@ -20,8 +20,23 @@ import java.util.Set;
 
 public class ArenaManager {
     private final Set<BlockPos> placedBlocks = new HashSet<>();
+    private ResourceKey<Level> cachedStageWorldKey;
+    
+    // Pre-calculated bounds for performance
+    private int minX, maxX, minY, maxY, minZ, maxZ;
 
     public void onServerStarted(MinecraftServer server) {
+        ModConfig.Area stage = ConfigManager.map.stageArea;
+        cachedStageWorldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(stage.world));
+
+        // Pre-calculate bounds
+        minX = (int) Math.min(stage.x1, stage.x2);
+        maxX = (int) Math.max(stage.x1, stage.x2);
+        minY = (int) Math.min(stage.y1, stage.y2);
+        maxY = (int) Math.max(stage.y1, stage.y2);
+        minZ = (int) Math.min(stage.z1, stage.z2);
+        maxZ = (int) Math.max(stage.z1, stage.z2);
+
         ModConfig.Area area = ConfigManager.map.joiningArea;
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(area.world));
         ServerLevel level = server.getLevel(worldKey);
@@ -35,7 +50,6 @@ public class ArenaManager {
         }
 
         // Also ensure building world has no spawn protection issues
-        ModConfig.Area stage = ConfigManager.map.stageArea;
         ResourceKey<Level> stageWorldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(stage.world));
         ServerLevel stageLevel = server.getLevel(stageWorldKey);
         if (stageLevel != null) {
@@ -62,8 +76,7 @@ public class ArenaManager {
     }
 
     public void cleanupStage(MinecraftServer server) {
-        ModConfig.Area stage = ConfigManager.map.stageArea;
-        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(stage.world));
+        ResourceKey<Level> worldKey = cachedStageWorldKey != null ? cachedStageWorldKey : ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(ConfigManager.map.stageArea.world));
         ServerLevel level = server.getLevel(worldKey);
         if (level == null) return;
 
@@ -79,13 +92,6 @@ public class ArenaManager {
             level.getChunkSource().getLightEngine().checkBlock(new BlockPos(0,0,0)); // Dummy trigger or rely on flag 2
             return;
         }
-
-        int minX = (int) Math.min(stage.x1, stage.x2);
-        int maxX = (int) Math.max(stage.x1, stage.x2);
-        int minY = (int) Math.min(stage.y1, stage.y2);
-        int maxY = (int) Math.max(stage.y1, stage.y2);
-        int minZ = (int) Math.min(stage.z1, stage.z2);
-        int maxZ = (int) Math.max(stage.z1, stage.z2);
 
         // Fallback: Clear EVERYTHING within the stage area (legacy/failsafe)
         // This is only called if tracking was lost or at first round start
@@ -104,7 +110,12 @@ public class ArenaManager {
 
 
     public void teleport(ServerPlayer player, ModConfig.Location loc) {
-        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(loc.world));
+        ResourceKey<Level> worldKey;
+        if (cachedStageWorldKey != null && loc.world.equals(ConfigManager.map.stageArea.world)) {
+            worldKey = cachedStageWorldKey;
+        } else {
+            worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(loc.world));
+        }
         ServerLevel level = ((ServerLevel)player.level()).getServer().getLevel(worldKey);
         if (level != null) {
             player.teleportTo(level, loc.x, loc.y, loc.z, Collections.<Relative>emptySet(), (float)loc.yaw, (float)loc.pitch, true);
@@ -124,10 +135,19 @@ public class ArenaManager {
     }
 
     public boolean isWithinStage(Level level, BlockPos pos) {
-        ModConfig.Area stage = ConfigManager.map.stageArea;
-        // Use floating point comparison to ensure precision
-        String world = level.dimension().location().toString();
-        return stage.contains(world, pos.getX(), pos.getY(), pos.getZ()) && pos.getY() >= stage.y1;
+        if (cachedStageWorldKey != null && !level.dimension().equals(cachedStageWorldKey)) {
+            return false;
+        }
+        
+        // Optimization: Use pre-calculated bounds
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+
+        return x >= minX && x <= maxX &&
+               y >= minY && y <= maxY &&
+               z >= minZ && z <= maxZ &&
+               y >= ConfigManager.map.stageArea.y1;
     }
 
     public boolean isFloor(BlockPos pos) {

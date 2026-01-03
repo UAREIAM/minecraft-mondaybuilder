@@ -9,6 +9,16 @@ import java.util.*;
 
 public class ScoringSystem {
     private final Map<UUID, Integer> guessStreaks = new HashMap<>();
+    private final List<AdvancementHolder> cachedModAdvancements = new ArrayList<>();
+
+    private void lazyLoadAdvancements(MinecraftServer server) {
+        if (!cachedModAdvancements.isEmpty()) return;
+        for (AdvancementHolder advancement : server.getAdvancements().getAllAdvancements()) {
+            if (advancement.id().getNamespace().equals("mondaybuilder")) {
+                cachedModAdvancements.add(advancement);
+            }
+        }
+    }
 
     public int calculate(GuessContext context) {
         int elapsedTicks = context.totalTicks() - context.ticksRemaining();
@@ -96,10 +106,12 @@ public class ScoringSystem {
 
     public void resetAdvancements(MinecraftServer server, ServerPlayer player) {
         if (server == null || player == null) return;
-        // Revoke all advancements belonging to this mod
-        for (AdvancementHolder advancement : server.getAdvancements().getAllAdvancements()) {
-            if (advancement.id().getNamespace().equals("mondaybuilder")) {
-                AdvancementProgress progress = player.getAdvancements().getOrStartProgress(advancement);
+        lazyLoadAdvancements(server);
+        
+        // Revoke all advancements belonging to this mod using cached list
+        for (AdvancementHolder advancement : cachedModAdvancements) {
+            AdvancementProgress progress = player.getAdvancements().getOrStartProgress(advancement);
+            if (progress.isDone() || progress.hasProgress()) {
                 for (String criterion : progress.getCompletedCriteria()) {
                     player.getAdvancements().revoke(advancement, criterion);
                 }
