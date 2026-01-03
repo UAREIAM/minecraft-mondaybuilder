@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import java.util.UUID;
 
 public class BlockInteractionManager {
@@ -22,29 +23,48 @@ public class BlockInteractionManager {
     public EventResult onBlockBreak(Level level, BlockPos pos, ServerPlayer player, GameState state, RoundContext currentRound) {
         if (state == GameState.BUILDING && currentRound != null && 
             com.mondaybuilder.core.GameManager.getInstance().getPlayerRole(player.getUUID()) == com.mondaybuilder.core.session.PlayerRole.BUILDER) {
+            
             // ONLY the builder can break blocks, and only within the stage area
-            if (arena.isWithinStage(level, pos) && pos.getY() >= ConfigManager.map.stageArea.y1) {
-                arena.removePlacedBlock(pos);
-                // Faked survival behavior in Creative: increment the block count when broken
+            if (arena.isWithinStage(level, pos)) {
                 BlockState brokenState = level.getBlockState(pos);
-                if (brokenState.getBlock().getDescriptionId().contains("wool")) {
+                Item brokenItem = brokenState.getBlock().asItem();
+
+                // Restriction: ONLY handle building blocks
+                if (com.mondaybuilder.core.GameManager.getInstance().getInventoryManager().isBuildingBlock(brokenItem)) {
+                    arena.removePlacedBlock(pos);
+                    
+                    boolean found = false;
                     ItemStack mainHand = player.getMainHandItem();
-                    if (!mainHand.isEmpty() && mainHand.getItem().equals(brokenState.getBlock().asItem())) {
-                        mainHand.grow(1);
-                        player.containerMenu.broadcastChanges();
-                    } else {
-                        // Fallback to inventory scan ONLY if not in main hand
+                    
+                    // Priority 1: Main hand
+                    if (!mainHand.isEmpty() && mainHand.getItem().equals(brokenItem)) {
+                        mainHand.setCount(mainHand.getCount() + 1);
+                        found = true;
+                    }
+
+                    if (!found) {
+                        // Priority 2: Inventory scan
                         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                             ItemStack stack = player.getInventory().getItem(i);
-                            if (!stack.isEmpty() && stack.getItem().equals(brokenState.getBlock().asItem())) {
-                                stack.grow(1);
-                                player.containerMenu.broadcastChanges();
+                            if (!stack.isEmpty() && stack.getItem().equals(brokenItem)) {
+                                stack.setCount(stack.getCount() + 1);
+                                found = true;
                                 break;
                             }
                         }
                     }
+                    
+                    if (!found) {
+                        // Fix: If the inventory does not contain the block (last block placed), add one
+                        player.getInventory().add(new ItemStack(brokenItem, 1));
+                    }
+                    
+                    player.containerMenu.broadcastChanges();
+                    return EventResult.pass();
+                } else {
+                    // Prevent breaking non-building blocks (like floor/walls) and prevent getting other blocks
+                    return EventResult.interruptFalse();
                 }
-                return EventResult.pass();
             }
         }
         return EventResult.interruptFalse();
@@ -80,8 +100,8 @@ public class BlockInteractionManager {
              return EventResult.interruptFalse();
         }
         
-        // Restriction: ONLY allow Wool blocks to be placed to prevent Creative inventory abuse.
-        if (!blockState.getBlock().getDescriptionId().contains("wool")) {
+        // Restriction: ONLY allow building blocks to be placed to prevent Creative inventory abuse.
+        if (!com.mondaybuilder.core.GameManager.getInstance().getInventoryManager().isBuildingBlock(blockState.getBlock().asItem())) {
             return EventResult.interruptFalse();
         }
 

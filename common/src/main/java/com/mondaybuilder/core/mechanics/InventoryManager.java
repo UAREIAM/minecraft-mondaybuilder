@@ -43,6 +43,12 @@ public class InventoryManager {
         }
     }
 
+    public boolean isBuildingBlock(Item item) {
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
+        if (key == null) return false;
+        return STARTING_WOOL.contains(key.toString());
+    }
+
     /**
      * Processes pending shrinks and optionally performs inventory sanitization.
      */
@@ -107,10 +113,10 @@ public class InventoryManager {
                     p.closeContainer();
                 }
                 
-                // Sanitization: Remove any non-wool items. 
+                // Sanitization: Remove any non-building items. 
                 for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
                     ItemStack stack = p.getInventory().getItem(i);
-                    if (!stack.isEmpty() && !stack.getItem().getDescriptionId().contains("wool")) {
+                    if (!stack.isEmpty() && !isBuildingBlock(stack.getItem())) {
                         p.getInventory().setItem(i, ItemStack.EMPTY);
                     }
                 }
