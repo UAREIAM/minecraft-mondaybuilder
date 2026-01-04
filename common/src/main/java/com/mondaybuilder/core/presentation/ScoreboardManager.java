@@ -28,20 +28,32 @@ public class ScoreboardManager {
         if (objective != null) {
             scoreboard.removeObjective(objective);
         }
-        objective = scoreboard.addObjective(OBJECTIVE_NAME, ObjectiveCriteria.DUMMY, Component.literal(ConfigManager.getLang("ui.scoreboard.title")), ObjectiveCriteria.RenderType.INTEGER, true, null);
+        // Increase width by padding title
+        String paddedTitle = "   " + ConfigManager.getLang("ui.scoreboard.title") + "   ";
+        objective = scoreboard.addObjective(OBJECTIVE_NAME, ObjectiveCriteria.DUMMY, Component.literal(paddedTitle), ObjectiveCriteria.RenderType.INTEGER, true, null);
         scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
     }
 
     public void updateScoreboard(MinecraftServer server) {
+        // Re-init to clear old entries and apply new formatting/width
+        initScoreboard(server);
+        
         Scoreboard scoreboard = server.getScoreboard();
         Objective objective = scoreboard.getObjective(OBJECTIVE_NAME);
         if (objective == null) return;
 
         GameManager gm = GameManager.getInstance();
+        UUID builderUuid = gm.getCurrentBuilder();
+
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             int score = scoring.getScore(player);
             String color = gm.getPlayerColorHex(player.getUUID());
-            String displayName = color + player.getScoreboardName();
+            
+            // Format: Bold if builder
+            String bold = player.getUUID().equals(builderUuid) ? "§l" : "";
+            // Increase width by padding player names
+            String displayName = "   " + color + bold + player.getScoreboardName() + "   ";
+            
             scoreboard.getOrCreatePlayerScore(ScoreHolder.forNameOnly(displayName), objective).set(score);
         }
     }
