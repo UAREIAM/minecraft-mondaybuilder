@@ -1,5 +1,6 @@
 package com.mondaybuilder.core.mechanics;
 
+import com.mondaybuilder.config.ConfigManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,22 +10,28 @@ import net.minecraft.server.MinecraftServer;
 import java.util.*;
 
 public class InventoryManager {
-    private static final List<String> STARTING_WOOL = Arrays.asList(
-        "minecraft:white_wool",
-        "minecraft:yellow_wool",
-        "minecraft:orange_wool",
-        "minecraft:pink_wool",
-        "minecraft:red_wool",
-        "minecraft:lime_wool",
-        "minecraft:light_gray_wool",
-        "minecraft:black_wool",
-        "minecraft:brown_wool"
-    );
-
     private final Map<UUID, Map<Item, Integer>> pendingShrinks = new HashMap<>();
 
+    private List<String> getItemsPool() {
+        List<String> pool = ConfigManager.items.pool;
+        if (pool == null || pool.isEmpty()) {
+            return Arrays.asList(
+                "minecraft:white_wool",
+                "minecraft:yellow_wool",
+                "minecraft:orange_wool",
+                "minecraft:pink_wool",
+                "minecraft:red_wool",
+                "minecraft:lime_wool",
+                "minecraft:light_gray_wool",
+                "minecraft:black_wool",
+                "minecraft:brown_wool"
+            );
+        }
+        return pool;
+    }
+
     public void giveStartingItems(ServerPlayer player, int amount) {
-        STARTING_WOOL.forEach(id -> {
+        getItemsPool().forEach(id -> {
             BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(id)).ifPresent(item -> {
                 player.getInventory().add(new ItemStack(item, amount));
             });
@@ -46,7 +53,7 @@ public class InventoryManager {
     public boolean isBuildingBlock(Item item) {
         ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
         if (key == null) return false;
-        return STARTING_WOOL.contains(key.toString());
+        return getItemsPool().contains(key.toString());
     }
 
     /**

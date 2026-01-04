@@ -1,0 +1,7 @@
+{
+  "categories": {
+    "EASY": ["Flower", "Tree", "Arrow", "Window", "Fence", "Glasses", "Heart", "Moon", "Table", "Ladder", "Stair", "LOL", "Flash", "Square"],
+    "INTERMEDIATE": ["Bird", "Door", "House", "Sword", "Creeper", "Helmet", "Hat", "Bucket", "Telephone", "Cookie", "Star", "Pizza", "Fire", "Hammer", "Axe", "Pickaxe", "Fish", "Bed", "Chair", "Key", "Candle", "Cloud", "Shoe", "Leaf", "67"],
+    "STRONG": ["Snowman", "Butterfly", "Bottle", "Car", "Book", "Bee", "Rocket", "Smiley", "Chicken", "Umbrella", "Dice", "Saturn", "Apple", "Frog", "Cat", "Pig"]
+  }
+}

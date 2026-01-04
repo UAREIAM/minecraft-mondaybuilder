@@ -1,6 +1,7 @@
 package com.mondaybuilder.core.presentation;
 
 import com.mondaybuilder.MondayBuilder;
+import com.mondaybuilder.config.ConfigManager;
 import com.mondaybuilder.core.mechanics.ScoringSystem;
 import com.mondaybuilder.core.GameManager;
 import net.minecraft.network.chat.Component;
@@ -27,7 +28,7 @@ public class ScoreboardManager {
         if (objective != null) {
             scoreboard.removeObjective(objective);
         }
-        objective = scoreboard.addObjective(OBJECTIVE_NAME, ObjectiveCriteria.DUMMY, Component.literal("§6Score Board"), ObjectiveCriteria.RenderType.INTEGER, true, null);
+        objective = scoreboard.addObjective(OBJECTIVE_NAME, ObjectiveCriteria.DUMMY, Component.literal(ConfigManager.getLang("ui.scoreboard.title")), ObjectiveCriteria.RenderType.INTEGER, true, null);
         scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
     }
 

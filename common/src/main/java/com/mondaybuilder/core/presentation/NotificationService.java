@@ -1,5 +1,6 @@
 package com.mondaybuilder.core.presentation;
 
+import com.mondaybuilder.config.ConfigManager;
 import com.mondaybuilder.core.GameManager;
 import com.mondaybuilder.core.GameState;
 import com.mondaybuilder.core.session.RoundContext;
@@ -23,7 +24,7 @@ public class NotificationService {
 
     public void registerListeners() {
         ModEvents.GAME_START.register(server -> {
-            broadcastMessage(server, Component.literal("The game is starting!").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.starting")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
         });
 
         ModEvents.PLAYER_JOIN_GAME.register(player -> {
@@ -34,18 +35,18 @@ public class NotificationService {
                 broadcastSound(server, ModSounds.PLAYER_JOIN.get(), 1.0f, 1.0f);
                 
                 Component playerName = colored(player.getName().getString(), color);
-                broadcastMessage(server, Component.empty().append(playerName).append(Component.literal(" joined the game!").withStyle(ChatFormatting.YELLOW)));
+                broadcastMessage(server, Component.empty().append(playerName).append(Component.literal(" " + ConfigManager.getLang("player.joined", "").trim()).withStyle(ChatFormatting.YELLOW)));
                 
                 if (player.getUUID().equals(gm.getGameMaster())) {
-                    player.sendSystemMessage(Component.literal("Welcome ").append(playerName).append(Component.literal("! You are the §6Game Master§a. Have fun!").withStyle(ChatFormatting.GREEN)), false);
+                    player.sendSystemMessage(Component.literal(ConfigManager.getLang("welcome.master", player.getName().getString())), false);
                 } else {
-                    player.sendSystemMessage(Component.literal("Welcome ").append(playerName).append(Component.literal("! Have fun and enjoy the game.").withStyle(ChatFormatting.GREEN)), false);
+                    player.sendSystemMessage(Component.literal(ConfigManager.getLang("welcome.player", player.getName().getString())), false);
                 }
             }
         });
 
         ModEvents.GAME_OVER.register(server -> {
-            broadcastMessage(server, Component.literal("Game Over!").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.over")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
             
             GameManager gm = GameManager.getInstance();
             UUID winnerId = gm.getScoring().getWinner(server);
@@ -58,14 +59,14 @@ public class NotificationService {
             }
             
             Component winnerComp = colored(winnerName, color);
-            broadcastMessage(server, Component.literal("The winner is: ").withStyle(ChatFormatting.GOLD).append(winnerComp).append(Component.literal("!").withStyle(ChatFormatting.GOLD)));
-            broadcastTitle(server, Component.literal("GAME OVER").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Component.literal("The winner is: ").withStyle(ChatFormatting.GRAY).append(winnerComp), 10, 100, 20);
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.winner", "")).withStyle(ChatFormatting.GOLD).append(winnerComp));
+            broadcastTitle(server, Component.literal(ConfigManager.getLang("game.over.title")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Component.literal(ConfigManager.getLang("game.over.subtitle", winnerName)).withStyle(ChatFormatting.GRAY), 10, 100, 20);
         });
 
         ModEvents.WORD_GUESSED.register((winner, word, points) -> {
             MinecraftServer server = ((ServerLevel)winner.level()).getServer();
             int color = GameManager.getInstance().getPlayerColor(winner.getUUID());
-            broadcastMessage(server, Component.empty().append(colored(winner.getName().getString(), color)).append(Component.literal(" guessed correctly!").withStyle(ChatFormatting.GREEN)));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("player.guessed", winner.getName().getString())).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(color))));
             
             // Play sound for everyone EXCEPT the winner, because the winner gets an advancement toast sound
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -79,11 +80,11 @@ public class NotificationService {
             GameManager gm = GameManager.getInstance();
             RoundContext ctx = gm.getCurrentRound();
             String catInfo = ctx != null ? " (" + ctx.getCategory().getDisplayName().toLowerCase() + ")" : "";
-            broadcastMessage(server, Component.literal("Nobody guessed it! Word was: ").withStyle(ChatFormatting.RED).append(Component.literal(word + catInfo).withStyle(ChatFormatting.GOLD)));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("nobody.guessed", word + catInfo)).withStyle(ChatFormatting.RED));
         });
 
         ModEvents.ROUND_START.register((server, roundNum) -> {
-            broadcastMessage(server, Component.literal("Starting Round ").withStyle(ChatFormatting.YELLOW).append(Component.literal(String.valueOf(roundNum)).withStyle(ChatFormatting.GOLD)));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("round.starting", roundNum)).withStyle(ChatFormatting.YELLOW));
             broadcastSound(server, ModSounds.ROUND_START.get(), 1.0f, 1.0f);
         });
 
@@ -92,7 +93,7 @@ public class NotificationService {
         });
 
         ModEvents.ROUND_PREPARE.register((builder, word, category) -> {
-            sendTitle(builder, Component.literal("GET READY TO BUILD!").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), Component.literal("Your word is: ").withStyle(ChatFormatting.GRAY).append(Component.literal(word).withStyle(ChatFormatting.WHITE)).append(Component.literal(" (" + category.getDisplayName().toLowerCase() + ")").withStyle(ChatFormatting.DARK_GRAY)), 10, 70, 20);
+            sendTitle(builder, Component.literal(ConfigManager.getLang("get.ready.title")).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), Component.literal(ConfigManager.getLang("get.ready.subtitle", word, category.getDisplayName().toLowerCase())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
             
             MinecraftServer server = ((ServerLevel)builder.level()).getServer();
             if (server != null) {
@@ -102,7 +103,7 @@ public class NotificationService {
                 
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                     if (!p.getUUID().equals(builder.getUUID())) {
-                        sendTitle(p, Component.empty().append(builderName).append(Component.literal(" is the builder!").withStyle(ChatFormatting.GOLD)), Component.literal("Category: " + category.getDisplayName()).withStyle(ChatFormatting.GRAY), 10, 70, 20);
+                        sendTitle(p, Component.literal(ConfigManager.getLang("is.building.title", builder.getName().getString())).withStyle(ChatFormatting.GOLD), Component.literal(ConfigManager.getLang("is.building.subtitle", category.getDisplayName())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
                     }
                 }
             }
@@ -130,21 +131,20 @@ public class NotificationService {
             if (ctx != null) {
                 int currentRound = ctx.getRoundNumber();
                 int totalRounds = gm.getTotalRounds();
-                String roundInfo = "§8[§6" + currentRound + "§7/§6" + totalRounds + "§8]";
                 
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                     Component message;
                     if (p.getUUID().equals(ctx.getBuilder())) {
                         if (state == GameState.PREPARING) {
-                            message = Component.literal(roundInfo + " §eTime: §f" + timeStr);
+                            message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
                         } else {
-                            message = Component.literal(roundInfo + " §fWord: §a§l" + ctx.getWord() + " §8(§7" + ctx.getCategory().getDisplayName().toLowerCase() + "§8) §8| §eTime: §f" + timeStr);
+                            message = Component.literal(ConfigManager.getLang("actionbar.builder", currentRound, totalRounds, ctx.getWord(), ctx.getCategory().getDisplayName().toLowerCase(), timeStr));
                         }
                     } else {
                         if (state == GameState.BUILDING) {
-                            message = Component.literal(roundInfo + " §eGuess the word! §8(§7Category: " + ctx.getCategory().getDisplayName() + "§8) §8| §eTime: §f" + timeStr);
+                            message = Component.literal(ConfigManager.getLang("actionbar.guesser", currentRound, totalRounds, ctx.getCategory().getDisplayName(), timeStr));
                         } else {
-                            message = Component.literal(roundInfo + " §eTime: §f" + timeStr);
+                            message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
                         }
                     }
                     sendActionBar(p, message);

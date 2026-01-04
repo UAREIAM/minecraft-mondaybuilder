@@ -1,5 +1,6 @@
 package com.mondaybuilder.core.presentation;
 
+import com.mondaybuilder.config.ConfigManager;
 import com.mondaybuilder.core.GameManager;
 import com.mondaybuilder.core.session.WordCategory;
 import net.minecraft.network.chat.Component;
@@ -20,7 +21,7 @@ public class CategorySelectionUI {
     public static void open(ServerPlayer player, Consumer<WordCategory> callback) {
         player.openMenu(new SimpleMenuProvider((containerId, playerInventory, p) -> {
             return new CategoryMenu(containerId, playerInventory, callback);
-        }, Component.literal("Chose your skill")));
+        }, Component.literal(ConfigManager.getLang("ui.choose.skill"))));
     }
 
     private static class CategoryMenu extends ChestMenu {
@@ -32,13 +33,13 @@ public class CategorySelectionUI {
             this.callback = callback;
 
             ItemStack easyItem = new ItemStack(Items.PAPER);
-            easyItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("Easy"));
+            easyItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal(ConfigManager.getLang("ui.category.easy")));
             
             ItemStack intermediateItem = new ItemStack(Items.OAK_DOOR);
-            intermediateItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("Intermediate"));
+            intermediateItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal(ConfigManager.getLang("ui.category.intermediate")));
             
             ItemStack strongItem = new ItemStack(Items.BOOK);
-            strongItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("Strong"));
+            strongItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal(ConfigManager.getLang("ui.category.strong")));
 
             this.getContainer().setItem(11, easyItem);
             this.getContainer().setItem(13, intermediateItem);

@@ -60,8 +60,6 @@ public class ModConfig {
         public Area arenaArea = new Area("draft:end", -19, 50, -19, 19, 61, 19);
         public Area stageArea = new Area("draft:end", -7, 50, -7, 7, 61, 7);
         public Location stage = new Location("draft:end", 0, 50, 0);
-
-        public Location actionBlock = new Location("minecraft:overworld", 44, 1, 44);
     }
 
     public static class General {
@@ -77,5 +75,68 @@ public class ModConfig {
 
     public static class Words {
         public Map<String, List<String>> categories = new HashMap<>();
+    }
+
+    public static class Localization {
+        public Map<String, String> strings = new HashMap<>();
+
+        public Localization() {
+            // Default strings
+            strings.put("game.starting", "The game is starting!");
+            strings.put("player.joined", "%s joined the game!");
+            strings.put("welcome.master", "Welcome %s! You are the §6Game Master§a. Have fun!");
+            strings.put("welcome.player", "Welcome %s! Have fun and enjoy the game.");
+            strings.put("game.over", "Game Over!");
+            strings.put("game.winner", "The winner is: %s!");
+            strings.put("game.over.title", "GAME OVER");
+            strings.put("game.over.subtitle", "The winner is: %s");
+            strings.put("player.guessed", "%s guessed correctly!");
+            strings.put("nobody.guessed", "Nobody guessed it! Word was: %s");
+            strings.put("round.starting", "Starting Round %s");
+            strings.put("get.ready.title", "GET READY TO BUILD!");
+            strings.put("get.ready.subtitle", "Your word is: %s (%s)");
+            strings.put("is.building.title", "%s is the builder!");
+            strings.put("is.building.subtitle", "Category: %s");
+            strings.put("actionbar.time", "[%s/%s] Time: %s");
+            strings.put("actionbar.builder", "[%s/%s] Word: %s (%s) | Time: %s");
+            strings.put("actionbar.guesser", "[%s/%s] Guess the word! (Category: %s) | Time: %s");
+            
+            strings.put("command.skip", "Skipped to next round.");
+            strings.put("command.setword", "Word set to: %s");
+            strings.put("command.setbuilder", "Builder set to: %s");
+            strings.put("command.only.gm", "Only the Game Master can start the game!");
+            strings.put("command.already.running", "Game is already in progress!");
+            strings.put("command.starting", "Game starting with %s rounds!");
+            
+            strings.put("game.builder.left.restart", "The builder left the game. Restarting round %s...");
+            strings.put("game.builder.left.next", "The builder left the game. Starting next round...");
+            strings.put("ui.scoreboard.title", "§6Score Board");
+            
+            strings.put("command.info.title", "=== Game Info ===");
+            strings.put("command.info.state", "State: %s");
+            strings.put("command.info.word", "Word: %s");
+            strings.put("command.info.round", "Round: %s/%s");
+            strings.put("command.info.gm", "Game Master: %s");
+            strings.put("command.info.players", "--- Players ---");
+            strings.put("command.info.player.format", "- %s: %s%s");
+
+            strings.put("ui.choose.skill", "Choose your skill");
+            strings.put("ui.category.easy", "Easy");
+            strings.put("ui.category.intermediate", "Intermediate");
+            strings.put("ui.category.strong", "Strong");
+        }
+
+        public String get(String key) {
+            return strings.getOrDefault(key, key);
+        }
+
+        public String get(String key, Object... args) {
+            return String.format(get(key), args);
+        }
+    }
+
+    public static class MainConfig {
+        public General general = new General();
+        public Items items = new Items();
     }
 }

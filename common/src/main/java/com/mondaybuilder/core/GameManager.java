@@ -412,11 +412,11 @@ public class GameManager {
 
         if (state == GameState.PREPARING || state == GameState.SHOWING_WORD || state == GameState.BUILDING) {
             gameTimer.stop();
-            notify.broadcastMessage(server, Component.literal("The builder left the game. Restarting round " + currentRound.getRoundNumber() + "...").withStyle(net.minecraft.ChatFormatting.RED));
+            notify.broadcastMessage(server, Component.literal(ConfigManager.getLang("game.builder.left.restart", currentRound.getRoundNumber())).withStyle(net.minecraft.ChatFormatting.RED));
             nextRound(server, currentRound.getRoundNumber());
         } else if (state == GameState.ROUND_END) {
             gameTimer.stop();
-            notify.broadcastMessage(server, Component.literal("The builder left the game. Starting next round...").withStyle(net.minecraft.ChatFormatting.RED));
+            notify.broadcastMessage(server, Component.literal(ConfigManager.getLang("game.builder.left.next")).withStyle(net.minecraft.ChatFormatting.RED));
             nextRound(server, currentRound.getRoundNumber() + 1);
         }
     }

@@ -1,5 +1,6 @@
 package com.mondaybuilder.commands;
 
+import com.mondaybuilder.config.ConfigManager;
 import com.mondaybuilder.core.GameManager;
 import com.mondaybuilder.core.GameState;
 import com.mondaybuilder.core.session.PlayerRole;
@@ -61,28 +62,28 @@ public class ModCommands {
         GameManager gm = GameManager.getInstance();
         int nextRound = gm.getCurrentRound() != null ? gm.getCurrentRound().getRoundNumber() + 1 : 1;
         gm.nextRound(source.getServer(), nextRound);
-        source.sendSuccess(() -> Component.literal("Skipped to next round."), true);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.skip")), true);
         return 1;
     }
 
     private static int setWord(CommandSourceStack source, String word) {
         GameManager.getInstance().setCurrentWord(word);
-        source.sendSuccess(() -> Component.literal("Word set to: " + word), true);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.setword", word)), true);
         return 1;
     }
 
     private static int setBuilder(CommandSourceStack source, ServerPlayer player) {
         GameManager.getInstance().setCurrentBuilder(player.getUUID());
-        source.sendSuccess(() -> Component.literal("Builder set to: " + player.getName().getString()), true);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.setbuilder", player.getName().getString())), true);
         return 1;
     }
 
     private static int showInfo(CommandSourceStack source) {
         GameManager gm = GameManager.getInstance();
-        source.sendSuccess(() -> Component.literal("=== Game Info ==="), false);
-        source.sendSuccess(() -> Component.literal("State: " + gm.getState()), false);
-        source.sendSuccess(() -> Component.literal("Word: " + gm.getCurrentWord()), false);
-        source.sendSuccess(() -> Component.literal("Round: " + (gm.getCurrentRound() != null ? gm.getCurrentRound().getRoundNumber() : 0) + "/" + gm.getTotalRounds()), false);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.title")), false);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.state", gm.getState())), false);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.word", gm.getCurrentWord())), false);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.round", (gm.getCurrentRound() != null ? gm.getCurrentRound().getRoundNumber() : 0), gm.getTotalRounds())), false);
         
         UUID gmId = gm.getGameMaster();
         String tempGmName = "None";
@@ -91,15 +92,15 @@ public class ModCommands {
             tempGmName = p != null ? p.getName().getString() : gmId.toString();
         }
         final String gmName = tempGmName;
-        source.sendSuccess(() -> Component.literal("Game Master: " + gmName), false);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.gm", gmName)), false);
 
-        source.sendSuccess(() -> Component.literal("--- Players ---"), false);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.players")), false);
         for (UUID uuid : gm.getPlayers()) {
             ServerPlayer p = source.getServer().getPlayerList().getPlayer(uuid);
             String name = p != null ? p.getName().getString() : uuid.toString();
             PlayerRole role = gm.getPlayerRole(uuid);
             String gmTag = uuid.equals(gmId) ? " [GM]" : "";
-            source.sendSuccess(() -> Component.literal("- " + name + ": " + role + gmTag), false);
+            source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.player.format", name, role, gmTag)), false);
         }
         
         return 1;
@@ -111,17 +112,17 @@ public class ModCommands {
 
         GameManager gm = GameManager.getInstance();
         if (!player.getUUID().equals(gm.getGameMaster())) {
-            source.sendFailure(Component.literal("Only the Game Master can start the game!"));
+            source.sendFailure(Component.literal(ConfigManager.getLang("command.only.gm")));
             return 0;
         }
 
         if (gm.getState() != GameState.LOBBY && gm.getState() != GameState.GAME_END) {
-            source.sendFailure(Component.literal("Game is already in progress!"));
+            source.sendFailure(Component.literal(ConfigManager.getLang("command.already.running")));
             return 0;
         }
 
         gm.startNewGame(source.getServer(), rounds);
-        source.sendSuccess(() -> Component.literal("Game starting with " + rounds + " rounds!"), true);
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.starting", rounds)), true);
         return 1;
     }
 }
