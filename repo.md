@@ -1,33 +1,45 @@
-# Mondaybuilder Repository
+# Monday Builder (Montagsmaler)
 
-This repository contains the source code for the **Montagsmaler** (MondayBuilder) Minecraft mod, a Pictionary-style game for Minecraft 1.21.10 using the **Architectury** framework and **Fabric** loader.
+A Pictionary-style game mod for Minecraft 1.21.10, built using the **Architectury** framework and **Fabric** loader.
 
-## Project Structure
+## 🚀 Core Technologies
+- **Minecraft**: 1.21.10
+- **Framework**: Architectury API (Multi-loader support)
+- **Loader**: Fabric
+- **Language**: Java 21
+- **Build System**: Gradle
 
-- **`.zencoder/`**: Contains AI assistant configuration, documentation, and development rules.
-- **`common/`**: The core mod logic shared across all platforms.
-  - **`src/main/java/com/mondaybuilder/`**: Main Java source package.
-    - **`commands/`**: Command registrations and implementations (e.g., `ModCommands.java`).
-    - **`config/`**: Configuration management and data structures (`ConfigManager.java`).
-    - **`core/`**: Central game logic divided into sub-modules:
-      - **`env/`**: World and arena management.
-      - **`mechanics/`**: Gameplay rules, timers, and scoring.
-      - **`presentation/`**: UI, notifications, and scoreboard management.
-      - **`session/`**: Player roles, rounds, and word management.
-    - **`events/`**: Mod-specific event handling.
-    - **`mixin/`**: Mixins for injecting code into Minecraft.
-    - **`registry/`**: Mod registry entries (e.g., sounds).
-    - **`MondayBuilder.java`**: Main common mod entry point.
-  - **`src/main/resources/`**: Static assets and mod data.
-    - **`assets/mondaybuilder/`**: Textures, models, and translations.
-    - **`data/`**: Minecraft data packs and tags.
-    - **`mondaybuilder/`**: Custom JSON data for `config`, `localization`, and `words`.
-    - **`mondaybuilder.mixins.json`**: Mixin configuration.
+### Root Directory
+- `common/`: Core mod logic shared across all platforms.
+- `fabric/`: Fabric-specific implementation and entry points.
+- `mondaybuilder/`: Sub-project for specific tools or builders.
+- `.zencoder/`: AI assistant configuration and development rules.
+
+### Common Module (`common/src/main/java/com/mondaybuilder/`)
+- **`commands/`**: Command registrations and implementations.
+- **`config/`**: Configuration management (`ModConfig.java`, `ConfigManager.java`).
+- **`core/`**: Central game logic:
+    - **`env/`**: World and arena management (Lobby, Arena).
+    - **`mechanics/`**: Gameplay rules, timers, and scoring.
+    - **`presentation/`**: UI, notifications, and scoreboard.
+    - **`session/`**: Player roles, rounds, and word management.
+    - **`GameManager.java`**: Orchestrates the game flow.
+- **`events/`**: Mod-specific event handling.
+- **`mixin/`**: Mixins for injecting code into Minecraft.
+- **`registry/`**: Mod registry entries (e.g., sounds).
+- **`MondayBuilder.java`**: Main common mod entry point.
+
+### Resources (`common/src/main/resources/`)
+- **`assets/mondaybuilder/`**: Textures, models, and translations.
+- **`mondaybuilder/`**: Custom JSON data:
+    - `config.json`: Default configuration.
+    - `localization.json`: Custom string localizations.
+    - `words.json`: Word list for the game.
 
 
 ## Dependencies (v1.0.0)
 
-- **Minecraft**: 1.21.10
+## 📦 Dependencies
 - **Architectury API**: 18.0.6
 - **Fabric Loader**: 0.18.4
 - **Fabric API**: 0.138.4+1.21.10
