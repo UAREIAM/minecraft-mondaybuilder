@@ -79,7 +79,7 @@ public class NotificationService {
         ModEvents.WORD_NOT_GUESSED.register((server, word) -> {
             GameManager gm = GameManager.getInstance();
             RoundContext ctx = gm.getCurrentRound();
-            String catInfo = ctx != null ? " (" + ctx.getCategory().getDisplayName().toLowerCase() + ")" : "";
+            String catInfo = ctx != null ? " (" + ConfigManager.getLang(ctx.getCategory().getTranslationKey()).toLowerCase() + ")" : "";
             broadcastMessage(server, Component.literal(ConfigManager.getLang("nobody.guessed", word + catInfo)).withStyle(ChatFormatting.RED));
         });
 
@@ -93,7 +93,7 @@ public class NotificationService {
         });
 
         ModEvents.ROUND_PREPARE.register((builder, word, category) -> {
-            sendTitle(builder, Component.literal(ConfigManager.getLang("get.ready.title")).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), Component.literal(ConfigManager.getLang("get.ready.subtitle", word, category.getDisplayName().toLowerCase())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
+            sendTitle(builder, Component.literal(ConfigManager.getLang("get.ready.title")).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), Component.literal(ConfigManager.getLang("get.ready.subtitle", word, ConfigManager.getLang(category.getTranslationKey()).toLowerCase())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
             
             MinecraftServer server = ((ServerLevel)builder.level()).getServer();
             if (server != null) {
@@ -103,7 +103,7 @@ public class NotificationService {
                 
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                     if (!p.getUUID().equals(builder.getUUID())) {
-                        sendTitle(p, Component.literal(ConfigManager.getLang("is.building.title", builder.getName().getString())).withStyle(ChatFormatting.GOLD), Component.literal(ConfigManager.getLang("is.building.subtitle", category.getDisplayName())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
+                        sendTitle(p, Component.literal(ConfigManager.getLang("is.building.title", builder.getName().getString())).withStyle(ChatFormatting.GOLD), Component.literal(ConfigManager.getLang("is.building.subtitle", ConfigManager.getLang(category.getTranslationKey()))).withStyle(ChatFormatting.GRAY), 10, 70, 20);
                     }
                 }
             }
@@ -138,11 +138,11 @@ public class NotificationService {
                         if (state == GameState.PREPARING) {
                             message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
                         } else {
-                            message = Component.literal(ConfigManager.getLang("actionbar.builder", currentRound, totalRounds, ctx.getWord(), ctx.getCategory().getDisplayName().toLowerCase(), timeStr));
+                            message = Component.literal(ConfigManager.getLang("actionbar.builder", currentRound, totalRounds, ctx.getWord(), ConfigManager.getLang(ctx.getCategory().getTranslationKey()).toLowerCase(), timeStr));
                         }
                     } else {
                         if (state == GameState.BUILDING) {
-                            message = Component.literal(ConfigManager.getLang("actionbar.guesser", currentRound, totalRounds, ctx.getCategory().getDisplayName(), timeStr));
+                            message = Component.literal(ConfigManager.getLang("actionbar.guesser", currentRound, totalRounds, ConfigManager.getLang(ctx.getCategory().getTranslationKey()), timeStr));
                         } else {
                             message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
                         }

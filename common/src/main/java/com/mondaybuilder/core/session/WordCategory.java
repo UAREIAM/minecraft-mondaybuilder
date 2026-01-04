@@ -16,6 +16,7 @@ public enum WordCategory {
     }
 
     public String getDisplayName() { return displayName; }
+    public String getTranslationKey() { return "ui.category." + name().toLowerCase(); }
     public int getTimerSeconds() { return timerSeconds; }
     public int getBlockAmount() { return blockAmount; }
 }
