@@ -66,7 +66,6 @@ public class ModConfig {
         public int roundsToPlay = 10;
         public int maxPlayers = 15;
         public boolean miniGamesEnabled = true;
-        public boolean autoOpInTest = true;
     }
 
     public static class Items {

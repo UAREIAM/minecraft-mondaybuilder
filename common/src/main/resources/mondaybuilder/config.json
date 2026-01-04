@@ -2,8 +2,7 @@
   "general": {
     "roundsToPlay": 10,
     "maxPlayers": 15,
-    "miniGamesEnabled": true,
-    "autoOpInTest": true
+    "miniGamesEnabled": true
   },
   "items": {
     "pool": [
