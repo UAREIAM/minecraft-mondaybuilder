@@ -3,6 +3,8 @@ package com.mondaybuilder.mixin;
 import com.mondaybuilder.core.GameManager;
 import com.mondaybuilder.core.GameState;
 import com.mondaybuilder.core.session.PlayerRole;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromBlockPacket;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -26,6 +28,30 @@ public abstract class PickBlockMixin {
             GameManager.getInstance().getPlayerRole(player.getUUID()) == PlayerRole.BUILDER) {
             
             // Cancel any creative mode inventory updates for the builder during the build phase.
+            ci.cancel();
+        }
+    }
+
+    /**
+     * Blocks the "Pick Item From Block" packet.
+     */
+    @Inject(method = "handlePickItemFromBlock", at = @At("HEAD"), cancellable = true)
+    private void onHandlePickItemFromBlock(ServerboundPickItemFromBlockPacket packet, CallbackInfo ci) {
+        if (GameManager.getInstance().getState() == GameState.BUILDING &&
+            GameManager.getInstance().getPlayerRole(player.getUUID()) == PlayerRole.BUILDER) {
+            
+            ci.cancel();
+        }
+    }
+
+    /**
+     * Blocks the "Pick Item From Entity" packet.
+     */
+    @Inject(method = "handlePickItemFromEntity", at = @At("HEAD"), cancellable = true)
+    private void onHandlePickItemFromEntity(ServerboundPickItemFromEntityPacket packet, CallbackInfo ci) {
+        if (GameManager.getInstance().getState() == GameState.BUILDING &&
+            GameManager.getInstance().getPlayerRole(player.getUUID()) == PlayerRole.BUILDER) {
+            
             ci.cancel();
         }
     }
