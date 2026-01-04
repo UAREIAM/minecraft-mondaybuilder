@@ -24,7 +24,7 @@ public class NotificationService {
 
     public void registerListeners() {
         ModEvents.GAME_START.register(server -> {
-            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.starting")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.starting")).withStyle(ChatFormatting.GOLD));
         });
 
         ModEvents.PLAYER_JOIN_GAME.register(player -> {
@@ -46,7 +46,7 @@ public class NotificationService {
         });
 
         ModEvents.GAME_OVER.register(server -> {
-            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.over")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            broadcastMessage(server, Component.literal(ConfigManager.getLang("game.over")).withStyle(ChatFormatting.GOLD));
             
             GameManager gm = GameManager.getInstance();
             UUID winnerId = gm.getScoring().getWinner(server);
@@ -60,7 +60,7 @@ public class NotificationService {
             
             Component winnerComp = colored(winnerName, color);
             broadcastMessage(server, Component.literal(ConfigManager.getLang("game.winner", "")).withStyle(ChatFormatting.GOLD).append(winnerComp));
-            broadcastTitle(server, Component.literal(ConfigManager.getLang("game.over.title")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Component.literal(ConfigManager.getLang("game.over.subtitle", winnerName)).withStyle(ChatFormatting.GRAY), 10, 100, 20);
+            broadcastTitle(server, Component.literal(ConfigManager.getLang("game.over.title")).withStyle(ChatFormatting.GOLD), Component.literal(ConfigManager.getLang("game.over.subtitle", winnerName)).withStyle(ChatFormatting.GRAY), 10, 100, 20);
         });
 
         ModEvents.WORD_GUESSED.register((winner, word, points) -> {
@@ -93,7 +93,7 @@ public class NotificationService {
         });
 
         ModEvents.ROUND_PREPARE.register((builder, word, category) -> {
-            sendTitle(builder, Component.literal(ConfigManager.getLang("get.ready.title")).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), Component.literal(ConfigManager.getLang("get.ready.subtitle", word, ConfigManager.getLang(category.getTranslationKey()).toLowerCase())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
+            sendTitle(builder, Component.literal(ConfigManager.getLang("get.ready.title")).withStyle(ChatFormatting.GREEN), Component.literal(ConfigManager.getLang("get.ready.subtitle", word, ConfigManager.getLang(category.getTranslationKey()).toLowerCase())).withStyle(ChatFormatting.GRAY), 10, 70, 20);
             
             MinecraftServer server = ((ServerLevel)builder.level()).getServer();
             if (server != null) {
