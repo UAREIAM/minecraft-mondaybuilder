@@ -13,3 +13,4 @@ out/
 /fabric/.gradle/
 
 *todo*
+/common/src/main/resources/mondaybuilder.zip
