@@ -1,5 +1,6 @@
 package com.mondaybuilder;
 
+import com.minigames.MiniGameRegistry;
 import com.mondaybuilder.commands.ModCommands;
 import com.mondaybuilder.config.ConfigManager;
 import com.mondaybuilder.core.GameManager;
@@ -32,6 +33,7 @@ public final class MondayBuilder {
         System.out.println("Initializing Monday Builder Common...");
         ModSounds.register();
         ConfigManager.loadAll();
+        MiniGameRegistry.registerAll();
 
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
             ModCommands.register(dispatcher);

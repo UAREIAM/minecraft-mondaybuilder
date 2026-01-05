@@ -1,5 +1,8 @@
 package com.mondaybuilder.core;
 
+import com.minigames.MiniGame;
+import com.minigames.MiniGameListener;
+import com.minigames.MiniGameManager;
 import com.mondaybuilder.MondayBuilder;
 import com.mondaybuilder.config.ConfigManager;
 import com.mondaybuilder.core.env.ArenaManager;
@@ -34,7 +37,7 @@ import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.world.level.block.state.BlockState;
 import java.util.*;
 
-public class GameManager {
+public class GameManager implements MiniGameListener {
     private static final GameManager INSTANCE = new GameManager();
     private final ArenaManager arena = new ArenaManager();
     private final BlockInteractionManager blockInteractions = new BlockInteractionManager(arena);
@@ -55,14 +58,17 @@ public class GameManager {
     private UUID gameMaster;
     private WordCategory selectedCategory = WordCategory.EASY;
     private int tickCounter = 0;
+    private MinecraftServer server;
 
     private GameManager() {
         notify.registerListeners();
+        MiniGameManager.getInstance().addListener(this);
     }
     
     public static GameManager getInstance() { return INSTANCE; }
 
     public void onServerStarted(MinecraftServer server) {
+        this.server = server;
         arena.onServerStarted(server);
     }
 
@@ -216,6 +222,7 @@ public class GameManager {
     private void endRound(MinecraftServer server) {
         setState(GameState.ROUND_END);
         ModEvents.ROUND_END.invoker().onRoundChange(server, currentRound.getRoundNumber());
+        MiniGameTriggers.onRoundEnd(server, currentRound.getRoundNumber());
         
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             if (players.contains(p.getUUID())) {
@@ -238,6 +245,7 @@ public class GameManager {
     public void tick(MinecraftServer server) {
         if (state == GameState.LOBBY) return;
         gameTimer.tick();
+        MiniGameManager.getInstance().tick();
 
         // Process inventory shrinks and sanitization
         // Sanitization is throttled to every 10 ticks (0.5 seconds) to save CPU
@@ -447,5 +455,21 @@ public class GameManager {
             notify.broadcastMessage(server, Component.literal(ConfigManager.getLang("game.builder.left.next")).withStyle(net.minecraft.ChatFormatting.RED));
             nextRound(server, currentRound.getRoundNumber() + 1);
         }
+    }
+
+    @Override
+    public void onScoreUpdate(UUID playerUuid, int points) {
+        if (server == null) return;
+        
+        ServerPlayer player = server.getPlayerList().getPlayer(playerUuid);
+        if (player != null) {
+            scoring.addScore(player, points);
+            scoreboard.updateScoreboard(server);
+        }
+    }
+
+    @Override
+    public void onGameEnd(MiniGame game) {
+        // Handle global mini-game end effects if needed
     }
 }
