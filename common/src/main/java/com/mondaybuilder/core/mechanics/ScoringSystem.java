@@ -42,7 +42,7 @@ public class ScoringSystem {
         if (elapsedSeconds <= 10) return 10;
         if (elapsedSeconds <= 20) return 8;
         if (elapsedSeconds <= 40) return 5;
-        return 0;
+        return 3; // Minimum points for builder if guessed
     }
 
     public void addScore(ServerPlayer player, int points) {
@@ -65,11 +65,15 @@ public class ScoringSystem {
         return guessStreaks.getOrDefault(player, 0);
     }
 
+    public void resetScore(ServerPlayer player) {
+        player.setExperienceLevels(0);
+        player.setExperiencePoints(0);
+        player.totalExperience = 0;
+    }
+
     public void clearScores(MinecraftServer server) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            player.setExperienceLevels(0);
-            player.setExperiencePoints(0);
-            player.totalExperience = 0;
+            resetScore(player);
         }
     }
 

@@ -314,6 +314,9 @@ public class GameManager implements MiniGameListener {
         player.setHealth(player.getMaxHealth());
         player.getFoodData().setFoodLevel(20);
 
+        // Reset score/XP on join
+        scoring.resetScore(player);
+
         // BUG-2: Reset advancements on join
         scoring.resetAdvancements(((ServerLevel)player.level()).getServer(), player);
         // Explicitly grant root after reset to ensure the tab is visible
