@@ -1,7 +1,11 @@
 package com.minigames;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Abstract base class for all mini-games.
@@ -13,6 +17,14 @@ public abstract class MiniGame implements MiniGameInterface {
 
     protected MiniGame(String name) {
         this.name = name;
+    }
+
+    public Optional<String> getPlayerPrefix(UUID playerUuid) {
+        return Optional.empty();
+    }
+
+    public Optional<ChatFormatting> getPlayerColor(UUID playerUuid) {
+        return Optional.empty();
     }
 
     @Override

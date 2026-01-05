@@ -313,6 +313,21 @@ public class TicTacToeGame extends MiniGame {
         this.level = level;
     }
 
+    @Override
+    public Optional<String> getPlayerPrefix(UUID playerUuid) {
+        if (playerUuid.equals(activePlayer1) || playerUuid.equals(activePlayer2)) {
+            return Optional.of("* ");
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ChatFormatting> getPlayerColor(UUID playerUuid) {
+        if (playerUuid.equals(activePlayer1)) return Optional.of(ChatFormatting.RED);
+        if (playerUuid.equals(activePlayer2)) return Optional.of(ChatFormatting.BLUE);
+        return Optional.empty();
+    }
+
     private void setPrefixes() {
         setPrefix(activePlayer1, ChatFormatting.RED);
         setPrefix(activePlayer2, ChatFormatting.BLUE);
