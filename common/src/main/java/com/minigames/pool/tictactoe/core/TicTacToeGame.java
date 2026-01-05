@@ -256,6 +256,7 @@ public class TicTacToeGame extends MiniGame {
         if (player != null) {
             player.sendSystemMessage(Component.literal("It's your turn!"));
         }
+        MiniGameManager.getInstance().notifyGameUpdate(this);
     }
 
     private boolean checkWin(UUID playerUuid) {

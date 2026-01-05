@@ -488,7 +488,20 @@ public class GameManager implements MiniGameListener {
     }
 
     @Override
+    public void onGameStart(MiniGame game) {
+        if (server == null) return;
+        scoreboard.updateScoreboard(server);
+    }
+
+    @Override
+    public void onGameUpdate(MiniGame game) {
+        if (server == null) return;
+        scoreboard.updateScoreboard(server);
+    }
+
+    @Override
     public void onGameEnd(MiniGame game) {
-        // Handle global mini-game end effects if needed
+        if (server == null) return;
+        scoreboard.updateScoreboard(server);
     }
 }

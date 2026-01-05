@@ -51,8 +51,14 @@ public class ScoreboardManager {
             
             // Format: Bold if builder
             String bold = player.getUUID().equals(builderUuid) ? "§l" : "";
+            
+            String name = player.getScoreboardName();
+            if (player.hasCustomName() && player.getCustomName() != null) {
+                name = player.getCustomName().getString();
+            }
+
             // Increase width by padding player names
-            String displayName = "   " + color + bold + player.getScoreboardName() + "   ";
+            String displayName = "   " + color + bold + name + "   ";
             
             scoreboard.getOrCreatePlayerScore(ScoreHolder.forNameOnly(displayName), objective).set(score);
         }

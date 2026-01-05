@@ -37,6 +37,18 @@ public class MiniGameManager {
         }
     }
 
+    public void notifyGameStart(MiniGame game) {
+        for (MiniGameListener listener : listeners) {
+            listener.onGameStart(game);
+        }
+    }
+
+    public void notifyGameUpdate(MiniGame game) {
+        for (MiniGameListener listener : listeners) {
+            listener.onGameUpdate(game);
+        }
+    }
+
     public void notifyGameEnd(MiniGame game) {
         for (MiniGameListener listener : listeners) {
             listener.onGameEnd(game);
@@ -67,6 +79,7 @@ public class MiniGameManager {
 
         activeGame = game;
         activeGame.start();
+        notifyGameStart(activeGame);
     }
 
     public Optional<MiniGame> getRegisteredGame(String name) {
@@ -87,7 +100,9 @@ public class MiniGameManager {
 
     public void stopActiveGame() {
         if (activeGame != null) {
+            MiniGame game = activeGame;
             activeGame.stop();
+            notifyGameEnd(game);
             activeGame = null;
         }
     }
