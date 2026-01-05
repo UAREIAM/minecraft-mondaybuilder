@@ -267,10 +267,22 @@ public class GameManager {
 
     private void handleWinner(ServerPlayer winner) {
         currentRound = currentRound.withWinnerFound();
-        int points = scoring.calculate(new GuessContext(winner.getUUID(), gameTimer.getTicksRemaining(), 60 * 20, scoring.getStreak(winner.getUUID())));
+        int totalTicks = selectedCategory.getTimerSeconds() * 20;
+        GuessContext context = new GuessContext(winner.getUUID(), gameTimer.getTicksRemaining(), totalTicks, scoring.getStreak(winner.getUUID()));
+        
+        int points = scoring.calculate(context);
         scoring.addScore(winner, points);
         scoring.incrementStreak(winner.getUUID());
         scoring.grantAdvancement(((ServerLevel)winner.level()).getServer(), winner, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "correct_guess"));
+        
+        // Award points to builder
+        ServerPlayer builder = ((ServerLevel)winner.level()).getServer().getPlayerList().getPlayer(currentRound.getBuilder());
+        if (builder != null) {
+            int builderPoints = scoring.calculateBuilderPoints(context);
+            if (builderPoints > 0) {
+                scoring.addScore(builder, builderPoints);
+            }
+        }
         
         ModEvents.WORD_GUESSED.invoker().onGuessed(winner, currentRound.getWord(), points);
         scoreboard.updateScoreboard(((ServerLevel)winner.level()).getServer());

@@ -34,6 +34,17 @@ public class ScoringSystem {
         return basePoints + (context.currentStreak() * 2);
     }
 
+    public int calculateBuilderPoints(GuessContext context) {
+        int elapsedTicks = context.totalTicks() - context.ticksRemaining();
+        int elapsedSeconds = elapsedTicks / 20;
+
+        if (elapsedSeconds <= 5) return 15;
+        if (elapsedSeconds <= 10) return 10;
+        if (elapsedSeconds <= 20) return 8;
+        if (elapsedSeconds <= 40) return 5;
+        return 0;
+    }
+
     public void addScore(ServerPlayer player, int points) {
         player.setExperienceLevels(player.experienceLevel + points);
     }
