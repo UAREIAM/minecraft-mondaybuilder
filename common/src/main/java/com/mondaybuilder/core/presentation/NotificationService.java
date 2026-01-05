@@ -101,6 +101,21 @@ public class NotificationService {
             }
         });
 
+        ModEvents.TIC_TAC_TOE_WIN.register(winner -> {
+            MinecraftServer server = ((ServerLevel)winner.level()).getServer();
+            if (server == null) return;
+            
+            int color = GameManager.getInstance().getPlayerColor(winner.getUUID());
+            broadcastMessage(server, Component.literal(winner.getName().getString() + " won the Tic Tac Toe round!").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(color))));
+
+            // Play sound for everyone EXCEPT the winner, because the winner gets an advancement toast sound
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                if (!p.getUUID().equals(winner.getUUID())) {
+                    playSound(p, ModSounds.GUESS_RIGHT, 1.0f, 1.0f);
+                }
+            }
+        });
+
         ModEvents.WORD_NOT_GUESSED.register((server, word) -> {
             GameManager gm = GameManager.getInstance();
             RoundContext ctx = gm.getCurrentRound();

@@ -4,9 +4,13 @@ import com.minigames.MiniGame;
 import com.minigames.MiniGameManager;
 import com.minigames.MiniGameState;
 import com.mondaybuilder.config.ConfigManager;
+import com.mondaybuilder.core.GameManager;
+import com.mondaybuilder.events.ModEvents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
@@ -94,6 +98,7 @@ public class TicTacToeGame extends MiniGame {
 
     @Override
     protected void onStop() {
+        clearPrefixes();
         for (UUID uuid : totalParticipants) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
             if (player != null) {
@@ -129,6 +134,7 @@ public class TicTacToeGame extends MiniGame {
     }
 
     private void startNextMatch() {
+        clearPrefixes();
         if (participants.size() < 2) {
             if (participants.size() == 1) {
                 ServerPlayer winner = level.getServer().getPlayerList().getPlayer(participants.get(0));
@@ -164,6 +170,7 @@ public class TicTacToeGame extends MiniGame {
         currentTurnPlayer = activePlayer1; // Player 1 starts
         resetBoard();
         updateGameModes();
+        setPrefixes();
         notifyTurn();
     }
 
@@ -273,10 +280,16 @@ public class TicTacToeGame extends MiniGame {
 
     private void handleWin(ServerPlayer winner) {
         MiniGameManager.getInstance().notifyScoreUpdate(winner.getUUID(), 1);
-        level.getServer().getPlayerList().broadcastSystemMessage(
-            Component.literal(winner.getName().getString() + " won the round!"),
-            false
+        
+        // Grant advancement
+        GameManager.getInstance().getScoring().grantAdvancement(
+            level.getServer(),
+            winner,
+            ResourceLocation.fromNamespaceAndPath("mondaybuilder", "tic_tac_toe_master")
         );
+
+        // Notify win (sound and message)
+        ModEvents.TIC_TAC_TOE_WIN.invoker().onWin(winner);
         
         // Give point, remove loser, start next match
         UUID loser = winner.getUUID().equals(activePlayer1) ? activePlayer2 : activePlayer1;
@@ -297,5 +310,32 @@ public class TicTacToeGame extends MiniGame {
 
     public void setLevel(ServerLevel level) {
         this.level = level;
+    }
+
+    private void setPrefixes() {
+        setPrefix(activePlayer1, ChatFormatting.RED);
+        setPrefix(activePlayer2, ChatFormatting.BLUE);
+    }
+
+    private void setPrefix(UUID uuid, ChatFormatting color) {
+        if (uuid == null) return;
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
+        if (player != null) {
+            Component prefix = Component.literal("* ").withStyle(color);
+            Component newName = Component.empty().append(prefix).append(player.getName());
+            player.setCustomName(newName);
+            player.setCustomNameVisible(true);
+        }
+    }
+
+    private void clearPrefixes() {
+        if (level == null) return;
+        for (UUID uuid : totalParticipants) {
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
+            if (player != null) {
+                player.setCustomName(null);
+                player.setCustomNameVisible(false);
+            }
+        }
     }
 }

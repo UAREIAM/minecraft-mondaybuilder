@@ -19,6 +19,7 @@ import java.util.UUID;
 public class ModCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralCommandNode<CommandSourceStack> mbNode = dispatcher.register(Commands.literal("mondaybuilder")
+            .requires(ModCommands::isGameMaster)
             .then(Commands.literal("start")
                 .then(Commands.argument("rounds", IntegerArgumentType.integer(1))
                     .executes(context -> {
@@ -29,11 +30,9 @@ public class ModCommands {
                 .executes(context -> startGame(context.getSource(), 10))
             )
             .then(Commands.literal("skip")
-                .requires(source -> source.hasPermission(2))
                 .executes(context -> skipRound(context.getSource()))
             )
             .then(Commands.literal("setword")
-                .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("word", StringArgumentType.word())
                     .executes(context -> {
                         String word = StringArgumentType.getString(context, "word");
@@ -42,7 +41,6 @@ public class ModCommands {
                 )
             )
             .then(Commands.literal("setbuilder")
-                .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("player", EntityArgument.player())
                     .executes(context -> {
                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
@@ -61,6 +59,12 @@ public class ModCommands {
         );
 
         dispatcher.register(Commands.literal("mb").redirect(mbNode));
+    }
+
+    private static boolean isGameMaster(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) return true; // Console can run everything
+        return player.getUUID().equals(GameManager.getInstance().getGameMaster());
     }
 
     private static int skipRound(CommandSourceStack source) {
@@ -136,11 +140,6 @@ public class ModCommands {
         if (player == null) return 0;
 
         GameManager gm = GameManager.getInstance();
-        if (!player.getUUID().equals(gm.getGameMaster())) {
-            source.sendFailure(Component.literal(ConfigManager.getLang("command.only.gm")));
-            return 0;
-        }
-
         if (gm.getState() != GameState.LOBBY && gm.getState() != GameState.GAME_END) {
             source.sendFailure(Component.literal(ConfigManager.getLang("command.already.running")));
             return 0;

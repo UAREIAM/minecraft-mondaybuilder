@@ -22,6 +22,7 @@ public class ModEvents {
     public static final Event<WordGuessed> WORD_GUESSED = EventFactory.createLoop(WordGuessed.class);
     public static final Event<WordNotGuessed> WORD_NOT_GUESSED = EventFactory.createLoop(WordNotGuessed.class);
     public static final Event<TimerTick> TIMER_TICK = EventFactory.createLoop(TimerTick.class);
+    public static final Event<TicTacToeWin> TIC_TAC_TOE_WIN = EventFactory.createLoop(TicTacToeWin.class);
 
     // Player Lifecycle Events
     public static final Event<PlayerLobby> PLAYER_JOIN_LOBBY = EventFactory.createLoop(PlayerLobby.class);
@@ -68,5 +69,9 @@ public class ModEvents {
 
     public interface PlayerDeath {
         void onDeath(ServerPlayer player);
+    }
+
+    public interface TicTacToeWin {
+        void onWin(ServerPlayer winner);
     }
 }

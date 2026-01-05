@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:red_concrete"
+    },
+    "title": {
+      "text": "Big Player"
+    },
+    "description": {
+      "text": "Tic Tac Toe master"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

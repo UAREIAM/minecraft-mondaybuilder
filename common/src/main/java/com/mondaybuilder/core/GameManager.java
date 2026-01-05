@@ -396,6 +396,11 @@ public class GameManager implements MiniGameListener {
         if (gameMaster == null) {
             gameMaster = player.getUUID();
         }
+
+        // Synchronize command tree for the player
+        if (this.server != null) {
+            this.server.getCommands().sendCommands(player);
+        }
         
         // Send resource pack if configured
         String url = ConfigManager.general.resourcePackUrl;
@@ -435,6 +440,12 @@ public class GameManager implements MiniGameListener {
         playerRoles.remove(uuid);
         if (uuid.equals(gameMaster)) {
             gameMaster = players.isEmpty() ? null : players.get(0);
+            if (gameMaster != null && this.server != null) {
+                ServerPlayer newGm = this.server.getPlayerList().getPlayer(gameMaster);
+                if (newGm != null) {
+                    this.server.getCommands().sendCommands(newGm);
+                }
+            }
         }
 
         if (players.isEmpty()) {
