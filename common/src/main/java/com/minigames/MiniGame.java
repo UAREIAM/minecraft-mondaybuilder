@@ -1,5 +1,8 @@
 package com.minigames;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+
 /**
  * Abstract base class for all mini-games.
  */
@@ -73,6 +76,13 @@ public abstract class MiniGame implements MiniGameInterface {
             timer.tick();
             onTick();
         }
+    }
+
+    /**
+     * Called when a block is clicked during the mini-game.
+     */
+    public void onBlockClick(ServerPlayer player, BlockPos pos) {
+        // To be overridden by specific mini-games
     }
 
     // Abstract methods to be implemented by specific mini-games

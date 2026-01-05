@@ -1,5 +1,7 @@
 package com.minigames;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,14 +54,23 @@ public class MiniGameManager {
      * Starts a registered mini-game by name.
      */
     public void startGame(String name) {
+        getRegisteredGame(name).ifPresent(this::startGame);
+    }
+
+    /**
+     * Starts a specific mini-game.
+     */
+    public void startGame(MiniGame game) {
         if (activeGame != null && activeGame.getState() == MiniGameState.RUNNING) {
             return; // Already a game running
         }
 
-        Optional.ofNullable(registeredGames.get(name.toLowerCase())).ifPresent(game -> {
-            activeGame = game;
-            activeGame.start();
-        });
+        activeGame = game;
+        activeGame.start();
+    }
+
+    public Optional<MiniGame> getRegisteredGame(String name) {
+        return Optional.ofNullable(registeredGames.get(name.toLowerCase()));
     }
 
     public void pauseActiveGame() {
@@ -78,6 +89,12 @@ public class MiniGameManager {
         if (activeGame != null) {
             activeGame.stop();
             activeGame = null;
+        }
+    }
+
+    public void onBlockClick(ServerPlayer player, BlockPos pos) {
+        if (activeGame != null) {
+            activeGame.onBlockClick(player, pos);
         }
     }
 

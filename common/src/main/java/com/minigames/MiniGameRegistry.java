@@ -5,7 +5,6 @@ package com.minigames;
  */
 public class MiniGameRegistry {
     public static void registerAll() {
-        // Here we will register all built-in mini-games
-        // Example: MiniGameManager.getInstance().registerGame(new TicTacToeGame());
+        MiniGameManager.getInstance().registerGame(new com.minigames.pool.tictactoe.core.TicTacToeGame());
     }
 }

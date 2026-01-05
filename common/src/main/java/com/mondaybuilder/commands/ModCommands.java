@@ -53,6 +53,11 @@ public class ModCommands {
             .then(Commands.literal("info")
                 .executes(context -> showInfo(context.getSource()))
             )
+            .then(Commands.literal("minigame")
+                .then(Commands.literal("tictactoe")
+                    .executes(context -> startTicTacToe(context.getSource()))
+                )
+            )
         );
 
         dispatcher.register(Commands.literal("mb").redirect(mbNode));
@@ -103,6 +108,26 @@ public class ModCommands {
             source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.info.player.format", name, role, gmTag)), false);
         }
         
+        return 1;
+    }
+
+    private static int startTicTacToe(CommandSourceStack source) {
+        GameManager gm = GameManager.getInstance();
+        if (gm.getState() != GameState.LOBBY) {
+            source.sendFailure(Component.literal("This command can only be used in the lobby!"));
+            return 0;
+        }
+
+        com.minigames.MiniGameManager mm = com.minigames.MiniGameManager.getInstance();
+        mm.getRegisteredGame("TicTacToe").ifPresent(game -> {
+            if (game instanceof com.minigames.pool.tictactoe.core.TicTacToeGame ttt) {
+                ttt.setParticipants(gm.getPlayers());
+                ttt.setLevel(source.getLevel());
+            }
+            mm.startGame(game);
+        });
+
+        source.sendSuccess(() -> Component.literal("Starting Tic Tac Toe!"), true);
         return 1;
     }
 

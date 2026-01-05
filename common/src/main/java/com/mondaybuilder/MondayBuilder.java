@@ -111,5 +111,12 @@ public final class MondayBuilder {
             }
             return InteractionResult.PASS;
         });
+
+        InteractionEvent.RIGHT_CLICK_BLOCK.register((player, hand, pos, direction) -> {
+            if (player instanceof ServerPlayer serverPlayer) {
+                return GameManager.getInstance().onRightClickBlock(serverPlayer, pos);
+            }
+            return InteractionResult.PASS;
+        });
     }
 }

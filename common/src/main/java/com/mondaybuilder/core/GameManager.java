@@ -269,6 +269,11 @@ public class GameManager implements MiniGameListener {
         return blockInteractions.onLeftClickBlock(player, pos, state, currentRound);
     }
 
+    public InteractionResult onRightClickBlock(ServerPlayer player, BlockPos pos) {
+        MiniGameManager.getInstance().onBlockClick(player, pos);
+        return InteractionResult.PASS;
+    }
+
     public EventResult onBlockPlace(Level level, BlockPos pos, BlockState blockState, ServerPlayer player) {
         return blockInteractions.onBlockPlace(level, pos, blockState, player, state, currentRound);
     }
