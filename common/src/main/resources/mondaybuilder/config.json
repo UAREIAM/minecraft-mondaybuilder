@@ -2,7 +2,11 @@
   "general": {
     "roundsToPlay": 10,
     "maxPlayers": 15,
-    "miniGamesEnabled": true
+    "miniGamesEnabled": true,
+    "resourcePackUrl": "",
+    "resourcePackHash": "",
+    "resourcePackPrompt": "Please download the Monday Builder resource pack to hear the game sounds!",
+    "resourcePackRequired": false
   },
   "items": {
     "pool": [

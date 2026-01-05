@@ -37,6 +37,7 @@
     "ui.choose.skill": "Choose your skill",
     "ui.category.easy": "Easy",
     "ui.category.intermediate": "Intermediate",
-    "ui.category.strong": "Strong"
+    "ui.category.strong": "Strong",
+    "overlay.char": "\uE000"
   }
 }

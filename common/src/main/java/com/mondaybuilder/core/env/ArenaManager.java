@@ -110,12 +110,7 @@ public class ArenaManager {
 
 
     public void teleport(ServerPlayer player, ModConfig.Location loc) {
-        ResourceKey<Level> worldKey;
-        if (cachedStageWorldKey != null && loc.world.equals(ConfigManager.map.stageArea.world)) {
-            worldKey = cachedStageWorldKey;
-        } else {
-            worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(loc.world));
-        }
+        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(loc.world));
         ServerLevel level = ((ServerLevel)player.level()).getServer().getLevel(worldKey);
         if (level != null) {
             player.teleportTo(level, loc.x, loc.y, loc.z, Collections.<Relative>emptySet(), (float)loc.yaw, (float)loc.pitch, true);

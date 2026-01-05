@@ -21,10 +21,17 @@ import net.minecraft.server.level.ServerPlayer;
 
 public final class MondayBuilder {
     public static final String MOD_ID = "mondaybuilder";
+    private static boolean initialized = false;
 
     public static void init() {
-        ConfigManager.loadAll();
+        if (initialized) {
+            System.out.println("Monday Builder Common already initialized.");
+            return;
+        }
+        initialized = true;
+        System.out.println("Initializing Monday Builder Common...");
         ModSounds.register();
+        ConfigManager.loadAll();
 
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
             ModCommands.register(dispatcher);

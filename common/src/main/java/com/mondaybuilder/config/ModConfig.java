@@ -66,6 +66,10 @@ public class ModConfig {
         public int roundsToPlay = 10;
         public int maxPlayers = 15;
         public boolean miniGamesEnabled = true;
+        public String resourcePackUrl = "";
+        public String resourcePackHash = "";
+        public String resourcePackPrompt = "Please download the Monday Builder resource pack to hear the game sounds!";
+        public boolean resourcePackRequired = false;
     }
 
     public static class Items {
@@ -137,5 +141,6 @@ public class ModConfig {
     public static class MainConfig {
         public General general = new General();
         public Items items = new Items();
+        public MapConfig map = new MapConfig();
     }
 }

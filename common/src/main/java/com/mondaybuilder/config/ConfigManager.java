@@ -23,6 +23,7 @@ public class ConfigManager {
         ModConfig.MainConfig mainConfig = load("mondaybuilder.config.json", ModConfig.MainConfig.class);
         general = mainConfig.general;
         items = mainConfig.items;
+        map = mainConfig.map;
 
         // Load Words
         words = load("mondaybuilder.words.json", ModConfig.Words.class);

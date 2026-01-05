@@ -30,6 +30,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.world.level.block.state.BlockState;
 import java.util.*;
 
@@ -367,6 +368,21 @@ public class GameManager {
         if (gameMaster == null) {
             gameMaster = player.getUUID();
         }
+        
+        // Send resource pack if configured
+        String url = ConfigManager.general.resourcePackUrl;
+        if (url != null && !url.isEmpty()) {
+            UUID packUuid = UUID.nameUUIDFromBytes(MondayBuilder.MOD_ID.getBytes());
+            Component prompt = Component.literal(ConfigManager.general.resourcePackPrompt);
+            player.connection.send(new ClientboundResourcePackPushPacket(
+                packUuid, 
+                url, 
+                ConfigManager.general.resourcePackHash, 
+                ConfigManager.general.resourcePackRequired, 
+                Optional.of(prompt)
+            ));
+        }
+
         ModEvents.PLAYER_JOIN_GAME.invoker().onGameEvent(player);
     }
 

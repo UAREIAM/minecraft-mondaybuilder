@@ -13,18 +13,18 @@
   },
   "license": "CC0-1.0",
   "icon": "assets/mondaybuilder/icon.png",
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
     "main": [
       "com.mondaybuilder.fabric.MondayBuilderFabric"
-    ],
-    "client": [
-      "com.mondaybuilder.fabric.client.MondayBuilderFabricClient"
     ]
   },
   "mixins": [
     "mondaybuilder.mixins.json"
   ],
+  "custom": {
+    "fabric-api:registry-sync-ignored": true
+  },
   "depends": {
     "fabricloader": ">=0.18.4",
     "minecraft": "~1.21.10",

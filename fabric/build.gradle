@@ -7,6 +7,13 @@ architectury {
     fabric()
 }
 
+version = "0.0.3"
+base {
+    archivesName = "mondaybuilder-fabric"
+}
+
+println "Fabric project version: ${project.version}"
+
 // Add this to ensure common resources are included properly in the development environment
 dependencies {
     // ... existing dependencies
@@ -54,10 +61,16 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+    archiveVersion = rootProject.mod_version
+    preserveFileTimestamps = true
+    reproducibleFileOrder = false
 }
 
 remapJar {
     inputFile.set shadowJar.archiveFile
+    archiveVersion = rootProject.mod_version
+    preserveFileTimestamps = true
+    reproducibleFileOrder = false
 }
 
 tasks.register("setupWorld", Copy) {

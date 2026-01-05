@@ -32,7 +32,7 @@ public class NotificationService {
             if (server != null) {
                 GameManager gm = GameManager.getInstance();
                 int color = gm.getPlayerColor(player.getUUID());
-                broadcastSound(server, ModSounds.PLAYER_JOIN.get(), 1.0f, 1.0f);
+                broadcastSound(server, ModSounds.PLAYER_JOIN, 1.0f, 1.0f);
                 
                 Component playerName = colored(player.getName().getString(), color);
                 broadcastMessage(server, Component.empty().append(playerName).append(Component.literal(" " + ConfigManager.getLang("player.joined", "").trim()).withStyle(ChatFormatting.YELLOW)));
@@ -41,6 +41,10 @@ public class NotificationService {
                     player.sendSystemMessage(Component.literal(ConfigManager.getLang("welcome.master", player.getName().getString())), false);
                 } else {
                     player.sendSystemMessage(Component.literal(ConfigManager.getLang("welcome.player", player.getName().getString())), false);
+                }
+
+                if (gm.getState() == GameState.LOBBY) {
+                    sendTitle(player, Component.literal(ConfigManager.getLang("overlay.char")), null, 10, 120, 20);
                 }
             }
         });
@@ -71,7 +75,7 @@ public class NotificationService {
             // Play sound for everyone EXCEPT the winner, because the winner gets an advancement toast sound
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                 if (!p.getUUID().equals(winner.getUUID())) {
-                    playSound(p, ModSounds.GUESS_RIGHT.get(), 1.0f, 1.0f);
+                    playSound(p, ModSounds.GUESS_RIGHT, 1.0f, 1.0f);
                 }
             }
         });
@@ -85,11 +89,11 @@ public class NotificationService {
 
         ModEvents.ROUND_START.register((server, roundNum) -> {
             broadcastMessage(server, Component.literal(ConfigManager.getLang("round.starting", roundNum)).withStyle(ChatFormatting.YELLOW));
-            broadcastSound(server, ModSounds.ROUND_START.get(), 1.0f, 1.0f);
+            broadcastSound(server, ModSounds.ROUND_START, 1.0f, 1.0f);
         });
 
         ModEvents.ROUND_END.register((server, roundNum) -> {
-            broadcastSound(server, ModSounds.ROUND_END.get(), 1.0f, 1.0f);
+            broadcastSound(server, ModSounds.ROUND_END, 1.0f, 1.0f);
         });
 
         ModEvents.ROUND_PREPARE.register((builder, word, category) -> {
@@ -115,12 +119,12 @@ public class NotificationService {
             
             if (ticksRemaining % 20 == 0 && ticksRemaining > 0) {
                 if (state == GameState.PREPARING || state == GameState.SHOWING_WORD) {
-                    broadcastSound(server, ModSounds.GUESSER_PREPARE_TICK.get(), 1.0f, 1.0f);
+                    broadcastSound(server, ModSounds.GUESSER_PREPARE_TICK, 1.0f, 1.0f);
                 } else if (state == GameState.BUILDING) {
                     if (ticksRemaining <= 200) { // last 10 seconds
-                        broadcastSound(server, ModSounds.TIMER_TICK_PITCHED.get(), 1.0f, 1.0f + (10 - ticksRemaining/20.0f)*0.1f);
+                        broadcastSound(server, ModSounds.TIMER_TICK_PITCHED, 1.0f, 1.0f + (10 - ticksRemaining/20.0f)*0.1f);
                     } else {
-                        broadcastSound(server, ModSounds.TIMER_TICK.get(), 0.5f, 1.0f);
+                        broadcastSound(server, ModSounds.TIMER_TICK, 0.5f, 1.0f);
                     }
                 }
             }
