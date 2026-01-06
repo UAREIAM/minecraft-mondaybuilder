@@ -19,8 +19,9 @@ import java.util.UUID;
 public class ModCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralCommandNode<CommandSourceStack> mbNode = dispatcher.register(Commands.literal("mondaybuilder")
-            .requires(ModCommands::isGameMaster)
+            .requires(ModCommands::isGameMasterOrBuilder)
             .then(Commands.literal("start")
+                .requires(ModCommands::isGameMaster)
                 .then(Commands.argument("rounds", IntegerArgumentType.integer(1))
                     .executes(context -> {
                         int rounds = IntegerArgumentType.getInteger(context, "rounds");
@@ -33,6 +34,7 @@ public class ModCommands {
                 .executes(context -> skipRound(context.getSource()))
             )
             .then(Commands.literal("setword")
+                .requires(ModCommands::isGameMaster)
                 .then(Commands.argument("word", StringArgumentType.word())
                     .executes(context -> {
                         String word = StringArgumentType.getString(context, "word");
@@ -41,6 +43,7 @@ public class ModCommands {
                 )
             )
             .then(Commands.literal("setbuilder")
+                .requires(ModCommands::isGameMaster)
                 .then(Commands.argument("player", EntityArgument.player())
                     .executes(context -> {
                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
@@ -49,12 +52,14 @@ public class ModCommands {
                 )
             )
             .then(Commands.literal("stop")
+                .requires(ModCommands::isGameMaster)
                 .executes(context -> stopGame(context.getSource()))
             )
             .then(Commands.literal("info")
                 .executes(context -> showInfo(context.getSource()))
             )
             .then(Commands.literal("minigame")
+                .requires(ModCommands::isGameMaster)
                 .then(Commands.literal("tictactoe")
                     .executes(context -> startTicTacToe(context.getSource()))
                 )
@@ -70,9 +75,16 @@ public class ModCommands {
         return player.getUUID().equals(GameManager.getInstance().getGameMaster());
     }
 
+    private static boolean isGameMasterOrBuilder(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) return true;
+        GameManager gm = GameManager.getInstance();
+        return player.getUUID().equals(gm.getGameMaster()) || gm.getPlayerRole(player.getUUID()) == PlayerRole.BUILDER;
+    }
+
     private static int skipRound(CommandSourceStack source) {
         GameManager gm = GameManager.getInstance();
-        int nextRound = gm.getCurrentRound() != null ? gm.getCurrentRound().getRoundNumber() + 1 : 1;
+        int nextRound = gm.getCurrentRound() != null ? gm.getCurrentRound().getRoundNumber() : 1;
         gm.nextRound(source.getServer(), nextRound);
         source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.skip")), true);
         return 1;

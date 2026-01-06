@@ -1,9 +1,9 @@
 package com.mondaybuilder.core.session;
 
 public enum WordCategory {
-    EASY("Easy", 60, 10),
-    INTERMEDIATE("Intermediate", 90, 20),
-    STRONG("Strong", 120, 30);
+    EASY("Easy", 60, 30),
+    INTERMEDIATE("Intermediate", 90, 45),
+    STRONG("Strong", 120, 60);
 
     private final String displayName;
     private final int timerSeconds;
