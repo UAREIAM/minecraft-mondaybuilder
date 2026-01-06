@@ -40,5 +40,11 @@
     "sounds": [
       "mondaybuilder:60s_second_pitched"
     ]
+  },
+  "alert": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:alert"
+    ]
   }
 }

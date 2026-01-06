@@ -80,6 +80,20 @@ tasks.register("setupWorld", Copy) {
     outputs.upToDateWhen { file("run/world").exists() }
 }
 
+tasks.register("updateResourcePack", Zip) {
+    from project(":common").sourceSets.main.resources
+    include "assets/mondaybuilder/**"
+    include "pack.mcmeta"
+    exclude "**/*.flp"
+    exclude "**/Mondaybuilder/**"
+    archiveFileName = "mondaybuilder.zip"
+    destinationDirectory = file("run/resourcepacks")
+}
+
 tasks.named("runServer") {
     dependsOn "setupWorld"
+}
+
+tasks.named("runClient") {
+    dependsOn "updateResourcePack"
 }

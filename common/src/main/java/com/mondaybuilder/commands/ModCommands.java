@@ -63,10 +63,19 @@ public class ModCommands {
                 .then(Commands.literal("tictactoe")
                     .executes(context -> startTicTacToe(context.getSource()))
                 )
+                .then(Commands.literal("trigger")
+                    .executes(context -> triggerMiniGame(context.getSource()))
+                )
             )
         );
 
         dispatcher.register(Commands.literal("mb").redirect(mbNode));
+    }
+
+    private static int triggerMiniGame(CommandSourceStack source) {
+        GameManager.getInstance().triggerMiniGameSequence(source.getServer());
+        source.sendSuccess(() -> Component.literal("Triggering mini game event!"), true);
+        return 1;
     }
 
     private static boolean isGameMaster(CommandSourceStack source) {

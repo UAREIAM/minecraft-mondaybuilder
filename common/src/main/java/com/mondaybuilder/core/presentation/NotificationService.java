@@ -287,6 +287,7 @@ public class NotificationService {
 
     public void broadcastSound(MinecraftServer server, SoundEvent sound, float volume, float pitch) {
         if (server == null || sound == null) return;
+        System.out.println("Broadcasting sound: " + sound.location() + " to " + server.getPlayerList().getPlayers().size() + " players");
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             playSound(player, sound, volume, pitch);
         }

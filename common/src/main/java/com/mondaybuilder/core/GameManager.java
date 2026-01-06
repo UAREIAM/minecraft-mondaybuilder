@@ -289,28 +289,29 @@ public class GameManager implements MiniGameListener {
         return new Random().nextDouble() < chance;
     }
 
-    private void triggerMiniGameSequence(MinecraftServer server) {
+    public void triggerMiniGameSequence(MinecraftServer server) {
         setState(GameState.PAUSED);
         miniGameTriggeredByChance = true;
-        int alertDurationSeconds = 3;
+        int alertDurationSeconds = 6;
         
-        notify.broadcastSound(server, ModSounds.ALERT, 1.0f, 1.0f);
         notify.broadcastBlinkingTitle(server, 
             Component.literal("Mini Game Alert").withStyle(ChatFormatting.RED, ChatFormatting.BOLD),
             Component.literal("Prepare for a new game!").withStyle(ChatFormatting.GRAY),
             alertDurationSeconds
         );
 
-        gameTimer.scheduleTask((alertDurationSeconds + 3) * 20, () -> {
+        notify.broadcastSound(server, ModSounds.ALERT, 1.0f, 1.0f);
+
+        gameTimer.scheduleTask(alertDurationSeconds * 20, () -> {
             com.minigames.MiniGameManager mm = com.minigames.MiniGameManager.getInstance();
             mm.getRegisteredGame("TicTacToe").ifPresent(game -> {
                 notify.broadcastTitle(server, 
                     Component.literal(game.getName()).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                     Component.literal("Let's go!").withStyle(ChatFormatting.YELLOW),
-                    10, 40, 10
+                    10, 120, 10
                 );
                 
-                gameTimer.scheduleTask(2 * 20, () -> {
+                gameTimer.scheduleTask(6 * 20, () -> {
                     game.setTriggered(true);
                     if (game instanceof com.minigames.pool.tictactoe.core.TicTacToeGame ttt) {
                         ttt.setParticipants(new ArrayList<>(players));
