@@ -20,9 +20,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.BossEvent;
+import net.minecraft.server.level.ServerBossEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class NotificationService {
+
+    private final Map<UUID, ServerBossEvent> bossBars = new HashMap<>();
 
     public void registerListeners() {
         ModEvents.GAME_START.register(server -> {
@@ -70,7 +76,15 @@ public class NotificationService {
             }
         });
 
+        ModEvents.PLAYER_QUIT_GAME.register(player -> {
+            ServerBossEvent bar = bossBars.remove(player.getUUID());
+            if (bar != null) {
+                bar.removeAllPlayers();
+            }
+        });
+
         ModEvents.GAME_OVER.register(server -> {
+            clearBossBars();
             broadcastMessage(server, Component.literal(ConfigManager.getLang("game.over")).withStyle(ChatFormatting.GOLD));
 
             GameManager gm = GameManager.getInstance();
@@ -124,11 +138,13 @@ public class NotificationService {
         });
 
         ModEvents.ROUND_START.register((server, roundNum) -> {
+            clearBossBars();
             broadcastMessage(server, Component.literal(ConfigManager.getLang("round.starting", roundNum)).withStyle(ChatFormatting.YELLOW));
             broadcastSound(server, ModSounds.ROUND_START, 1.0f, 1.0f);
         });
 
         ModEvents.ROUND_END.register((server, roundNum) -> {
+            clearBossBars();
             broadcastSound(server, ModSounds.ROUND_END, 1.0f, 1.0f);
         });
 
@@ -173,6 +189,11 @@ public class NotificationService {
                 int totalRounds = gm.getTotalRounds();
 
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                    if (state == GameState.ROUND_END || state == GameState.LOBBY || state == GameState.GAME_END) {
+                        removeBossBar(p);
+                        continue;
+                    }
+
                     Component message;
                     if (p.getUUID().equals(ctx.getBuilder())) {
                         if (state == GameState.PREPARING) {
@@ -187,10 +208,45 @@ public class NotificationService {
                             message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
                         }
                     }
-                    sendActionBar(p, message);
+                    
+                    float progress = ctx.getTimer().getTotalTicks() > 0 ? (float) ticksRemaining / ctx.getTimer().getTotalTicks() : 0.0f;
+                    updateBossBar(p, message, progress, ticksRemaining);
                 }
             }
         });
+    }
+
+    private void updateBossBar(ServerPlayer player, Component name, float progress, int ticksRemaining) {
+        ServerBossEvent bossBar = bossBars.computeIfAbsent(player.getUUID(), uuid -> {
+            ServerBossEvent bar = new ServerBossEvent(name, BossEvent.BossBarColor.GREEN, BossEvent.BossBarOverlay.PROGRESS);
+            bar.addPlayer(player);
+            return bar;
+        });
+
+        bossBar.setName(name);
+        bossBar.setProgress(progress);
+
+        if (ticksRemaining <= 200) { // 10s
+            bossBar.setColor(BossEvent.BossBarColor.RED);
+        } else if (ticksRemaining <= 400) { // 20s
+            bossBar.setColor(BossEvent.BossBarColor.YELLOW);
+        } else {
+            bossBar.setColor(BossEvent.BossBarColor.GREEN);
+        }
+    }
+
+    private void removeBossBar(ServerPlayer player) {
+        ServerBossEvent bar = bossBars.remove(player.getUUID());
+        if (bar != null) {
+            bar.removeAllPlayers();
+        }
+    }
+
+    private void clearBossBars() {
+        for (ServerBossEvent bar : bossBars.values()) {
+            bar.removeAllPlayers();
+        }
+        bossBars.clear();
     }
 
     public void sendTitle(ServerPlayer player, Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {

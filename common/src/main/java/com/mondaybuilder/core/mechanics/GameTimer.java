@@ -11,15 +11,21 @@ public class GameTimer {
     }
 
     private int ticksRemaining;
+    private int totalTicks;
     private State state = State.IDLE;
     private Runnable onFinish;
     private Consumer<Integer> onTick;
 
     public void start(int ticks, Consumer<Integer> onTick, Runnable onFinish) {
         this.ticksRemaining = ticks;
+        this.totalTicks = ticks;
         this.onTick = onTick;
         this.onFinish = onFinish;
         this.state = State.RUNNING;
+    }
+
+    public int getTotalTicks() {
+        return totalTicks;
     }
 
     public void tick() {

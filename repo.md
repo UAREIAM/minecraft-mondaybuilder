@@ -2,6 +2,8 @@
 
 A Pictionary-style game mod for Minecraft 1.21.10, built using the **Architectury** framework and **Fabric** loader.
 
+@Zencoder: first run: only read this file.
+
 ## 🚀 Core Technologies
 - **Minecraft**: 1.21.10
 - **Framework**: Architectury API (Multi-loader support)
@@ -50,12 +52,18 @@ A Pictionary-style game mod for Minecraft 1.21.10, built using the **Architectur
 - `/mb color <Player> <#HEX>`: Sets a player's color using a HEX value.
 
 ## 📦 Build & Test
-- **Compile**: `./gradlew classes`
-- **Run Client**: `./gradlew :fabric:runClient`
-- **Run Server**: `./gradlew :fabric:runServer`
+- will be executed by the user only
 
 ## 📑 Project Info
 - **Version**: 0.0.3
 - **Architectury API**: 18.0.6
 - **Fabric Loader**: 0.18.4
 - **Fabric API**: 0.138.4+1.21.10
+
+# Zencoder rules
+- NEVER start developing until the user prompts for it!
+- DO NOT modify any existing code unless absolutely necessary.
+- Use meaningful names for variables, methods, classes, etc.
+- Follow consistent indentation and formatting conventions.
+- Write clear and concise comments explaining complex sections of code.
+- Ensure proper error handling and logging mechanisms are in place.
