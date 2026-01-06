@@ -48,6 +48,9 @@ public class ModCommands {
                     })
                 )
             )
+            .then(Commands.literal("stop")
+                .executes(context -> stopGame(context.getSource()))
+            )
             .then(Commands.literal("info")
                 .executes(context -> showInfo(context.getSource()))
             )
@@ -84,6 +87,12 @@ public class ModCommands {
     private static int setBuilder(CommandSourceStack source, ServerPlayer player) {
         GameManager.getInstance().setCurrentBuilder(player.getUUID());
         source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.setbuilder", player.getName().getString())), true);
+        return 1;
+    }
+
+    private static int stopGame(CommandSourceStack source) {
+        GameManager.getInstance().stopGame(source.getServer());
+        source.sendSuccess(() -> Component.literal(ConfigManager.getLang("command.stop")), true);
         return 1;
     }
 
@@ -140,7 +149,7 @@ public class ModCommands {
         if (player == null) return 0;
 
         GameManager gm = GameManager.getInstance();
-        if (gm.getState() != GameState.LOBBY && gm.getState() != GameState.GAME_END) {
+        if (gm.getState() != GameState.LOBBY) {
             source.sendFailure(Component.literal(ConfigManager.getLang("command.already.running")));
             return 0;
         }

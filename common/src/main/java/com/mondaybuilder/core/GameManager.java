@@ -69,6 +69,11 @@ public class GameManager implements MiniGameListener {
 
     public void onServerStarted(MinecraftServer server) {
         this.server = server;
+        this.state = GameState.LOBBY;
+        this.players.clear();
+        this.spectators.clear();
+        this.playerRoles.clear();
+        this.gameMaster = null;
         arena.onServerStarted(server);
     }
 
@@ -77,6 +82,7 @@ public class GameManager implements MiniGameListener {
         this.arena.clearPlacedBlocks();
         this.scoring.clearScores(server);
         this.scoreboard.initScoreboard(server);
+        setState(GameState.PREPARING); // Initial state change
         players.forEach(uuid -> {
             ServerPlayer p = server.getPlayerList().getPlayer(uuid);
             if (p != null) {
@@ -89,9 +95,25 @@ public class GameManager implements MiniGameListener {
         nextRound(server, 1);
     }
 
+    public void stopGame(MinecraftServer server) {
+        gameTimer.stop();
+        setState(GameState.LOBBY);
+        arena.cleanupStage(server);
+        players.forEach(uuid -> {
+            ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+            if (p != null) {
+                p.getInventory().clearContent();
+                p.setGameMode(GameType.ADVENTURE);
+                arena.teleportToLobby(p);
+                setRole(p, PlayerRole.PLAYER);
+            }
+        });
+        ModEvents.GAME_OVER.invoker().onStatusChange(server);
+    }
+
     public void nextRound(MinecraftServer server, int roundNum) {
         if (roundNum > totalRounds) {
-            setState(GameState.GAME_END);
+            setState(GameState.LOBBY);
             ModEvents.GAME_OVER.invoker().onStatusChange(server);
             players.forEach(uuid -> {
                 ServerPlayer p = server.getPlayerList().getPlayer(uuid);
@@ -243,9 +265,10 @@ public class GameManager implements MiniGameListener {
     }
 
     public void tick(MinecraftServer server) {
-        if (state == GameState.LOBBY) return;
         gameTimer.tick();
         MiniGameManager.getInstance().tick();
+
+        if (state == GameState.LOBBY) return;
 
         // Process inventory shrinks and sanitization
         // Sanitization is throttled to every 10 ticks (0.5 seconds) to save CPU
@@ -463,7 +486,7 @@ public class GameManager implements MiniGameListener {
     }
 
     private void handleBuilderLeft(MinecraftServer server) {
-        if (state == GameState.LOBBY || state == GameState.GAME_END) return;
+        if (state == GameState.LOBBY) return;
 
         if (state == GameState.PREPARING || state == GameState.SHOWING_WORD || state == GameState.BUILDING) {
             gameTimer.stop();

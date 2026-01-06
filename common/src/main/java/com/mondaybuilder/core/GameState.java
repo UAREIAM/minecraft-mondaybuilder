@@ -5,6 +5,5 @@ public enum GameState {
     PREPARING,
     SHOWING_WORD,
     BUILDING,
-    ROUND_END,
-    GAME_END
+    ROUND_END
 }

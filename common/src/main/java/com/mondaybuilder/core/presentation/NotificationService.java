@@ -189,28 +189,30 @@ public class NotificationService {
                 int totalRounds = gm.getTotalRounds();
 
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-                    if (state == GameState.ROUND_END || state == GameState.LOBBY || state == GameState.GAME_END) {
+                    if (state == GameState.ROUND_END || state == GameState.LOBBY) {
                         removeBossBar(p);
                         continue;
                     }
 
-                    Component message;
-                    if (p.getUUID().equals(ctx.getBuilder())) {
-                        if (state == GameState.PREPARING) {
-                            message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
+                    if (ticksRemaining % 20 == 0) {
+                        Component message;
+                        if (p.getUUID().equals(ctx.getBuilder())) {
+                            if (state == GameState.PREPARING) {
+                                message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
+                            } else {
+                                message = Component.literal(ConfigManager.getLang("actionbar.builder", currentRound, totalRounds, ctx.getWord(), ConfigManager.getLang(ctx.getCategory().getTranslationKey()).toLowerCase(), timeStr));
+                            }
                         } else {
-                            message = Component.literal(ConfigManager.getLang("actionbar.builder", currentRound, totalRounds, ctx.getWord(), ConfigManager.getLang(ctx.getCategory().getTranslationKey()).toLowerCase(), timeStr));
+                            if (state == GameState.BUILDING) {
+                                message = Component.literal(ConfigManager.getLang("actionbar.guesser", currentRound, totalRounds, ConfigManager.getLang(ctx.getCategory().getTranslationKey()), timeStr));
+                            } else {
+                                message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
+                            }
                         }
-                    } else {
-                        if (state == GameState.BUILDING) {
-                            message = Component.literal(ConfigManager.getLang("actionbar.guesser", currentRound, totalRounds, ConfigManager.getLang(ctx.getCategory().getTranslationKey()), timeStr));
-                        } else {
-                            message = Component.literal(ConfigManager.getLang("actionbar.time", currentRound, totalRounds, timeStr));
-                        }
+
+                        float progress = ctx.getTimer().getTotalTicks() > 0 ? (float) ticksRemaining / ctx.getTimer().getTotalTicks() : 0.0f;
+                        updateBossBar(p, message, progress, ticksRemaining);
                     }
-                    
-                    float progress = ctx.getTimer().getTotalTicks() > 0 ? (float) ticksRemaining / ctx.getTimer().getTotalTicks() : 0.0f;
-                    updateBossBar(p, message, progress, ticksRemaining);
                 }
             }
         });
