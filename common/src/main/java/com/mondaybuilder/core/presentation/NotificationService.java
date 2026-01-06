@@ -268,6 +268,18 @@ public class NotificationService {
         }
     }
 
+    public void broadcastBlinkingTitle(MinecraftServer server, Component title, Component subtitle, int seconds) {
+        for (int i = 0; i < seconds * 2; i++) {
+            final int delay = i * 10; // Every 0.5s
+            final boolean show = i % 2 == 0;
+            GameManager.getInstance().getTimer().scheduleTask(delay, () -> {
+                if (show) {
+                    broadcastTitle(server, title, subtitle, 0, 10, 0);
+                }
+            });
+        }
+    }
+
     public void playSound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
         if (player == null || sound == null) return;
         player.playNotifySound(sound, SoundSource.MASTER, volume, pitch);

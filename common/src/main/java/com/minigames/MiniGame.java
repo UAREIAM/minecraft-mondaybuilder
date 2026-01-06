@@ -14,6 +14,7 @@ public abstract class MiniGame implements MiniGameInterface {
     protected final String name;
     protected MiniGameState state = MiniGameState.IDLE;
     protected final MiniGameTimer timer = new MiniGameTimer();
+    protected boolean triggered = false;
 
     protected MiniGame(String name) {
         this.name = name;
@@ -78,6 +79,14 @@ public abstract class MiniGame implements MiniGameInterface {
     @Override
     public MiniGameTimer getTimer() {
         return timer;
+    }
+
+    public void setTriggered(boolean triggered) {
+        this.triggered = triggered;
+    }
+
+    public boolean isTriggered() {
+        return triggered;
     }
 
     /**

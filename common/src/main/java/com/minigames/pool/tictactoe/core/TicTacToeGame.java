@@ -99,21 +99,6 @@ public class TicTacToeGame extends MiniGame {
     @Override
     protected void onStop() {
         clearPrefixes();
-        for (UUID uuid : totalParticipants) {
-            ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
-            if (player != null) {
-                player.setGameMode(GameType.ADVENTURE);
-                // Teleport back to lobby
-                var lobby = ConfigManager.map.lobby;
-                ServerLevel lobbyLevel = level.getServer().getLevel(
-                    net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, 
-                    net.minecraft.resources.ResourceLocation.parse(lobby.world))
-                );
-                if (lobbyLevel != null) {
-                    player.teleportTo(lobbyLevel, lobby.x, lobby.y, lobby.z, Collections.emptySet(), (float)lobby.yaw, (float)lobby.pitch, true);
-                }
-            }
-        }
         participants.clear();
         totalParticipants.clear();
         activePlayer1 = null;
@@ -145,7 +130,7 @@ public class TicTacToeGame extends MiniGame {
                     );
                 }
             }
-            stop();
+            MiniGameManager.getInstance().stopActiveGame();
             return;
         }
 
@@ -162,7 +147,7 @@ public class TicTacToeGame extends MiniGame {
             
             if (activePlayer2 == null) {
                 // Should not happen if size >= 2
-                stop();
+                MiniGameManager.getInstance().stopActiveGame();
                 return;
             }
         }

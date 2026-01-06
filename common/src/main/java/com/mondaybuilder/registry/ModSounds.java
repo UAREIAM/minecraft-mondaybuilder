@@ -12,6 +12,7 @@ public class ModSounds {
     public static final SoundEvent GUESSER_PREPARE_TICK = create("guesser_prepare_tick");
     public static final SoundEvent TIMER_TICK = create("60s_second_default");
     public static final SoundEvent TIMER_TICK_PITCHED = create("60s_second_pitched");
+    public static final SoundEvent ALERT = create("alert");
 
     private static SoundEvent create(String name) {
         return SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, name));

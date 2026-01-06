@@ -1,8 +1,12 @@
 package com.mondaybuilder.core.mechanics;
 
 import java.util.function.Consumer;
+import java.util.*;
 
 public class GameTimer {
+    private final Map<Integer, List<Runnable>> scheduledTasks = new HashMap<>();
+    private int elapsedTicks = 0;
+
     public enum State {
         IDLE,
         RUNNING,
@@ -24,11 +28,22 @@ public class GameTimer {
         this.state = State.RUNNING;
     }
 
+    public void scheduleTask(int delayTicks, Runnable task) {
+        scheduledTasks.computeIfAbsent(elapsedTicks + delayTicks, k -> new ArrayList<>()).add(task);
+    }
+
     public int getTotalTicks() {
         return totalTicks;
     }
 
     public void tick() {
+        // Process scheduled tasks regardless of timer state (global timer behavior)
+        List<Runnable> tasks = scheduledTasks.remove(elapsedTicks);
+        if (tasks != null) {
+            tasks.forEach(Runnable::run);
+        }
+        elapsedTicks++;
+
         if (state != State.RUNNING) return;
 
         if (onTick != null) {

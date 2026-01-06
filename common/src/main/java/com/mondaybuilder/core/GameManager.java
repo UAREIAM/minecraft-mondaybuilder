@@ -24,6 +24,7 @@ import com.mondaybuilder.registry.ModSounds;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -55,6 +56,8 @@ public class GameManager implements MiniGameListener {
     private final Map<UUID, PlayerRole> playerRoles = new HashMap<>();
     private RoundContext currentRound;
     private int totalRounds = 10;
+    private int roundsSinceLastMiniGame = 0;
+    private boolean miniGameTriggeredByChance = false;
     private UUID gameMaster;
     private WordCategory selectedCategory = WordCategory.EASY;
     private int tickCounter = 0;
@@ -74,6 +77,8 @@ public class GameManager implements MiniGameListener {
         this.spectators.clear();
         this.playerRoles.clear();
         this.gameMaster = null;
+        this.roundsSinceLastMiniGame = 0;
+        this.miniGameTriggeredByChance = false;
         arena.onServerStarted(server);
     }
 
@@ -258,13 +263,68 @@ public class GameManager implements MiniGameListener {
         if (!currentRound.isWinnerFound()) {
             ModEvents.WORD_NOT_GUESSED.invoker().onNotGuessed(server, currentRound.getWord());
         }
-        gameTimer.start(10 * 20, 
-            t -> ModEvents.TIMER_TICK.invoker().onTick(server, t), 
-            () -> nextRound(server, currentRound.getRoundNumber() + 1)
+
+        roundsSinceLastMiniGame++;
+        if (shouldTriggerMiniGame()) {
+            triggerMiniGameSequence(server);
+        } else {
+            gameTimer.start(10 * 20, 
+                t -> ModEvents.TIMER_TICK.invoker().onTick(server, t), 
+                () -> nextRound(server, currentRound.getRoundNumber() + 1)
+            );
+        }
+    }
+
+    private boolean shouldTriggerMiniGame() {
+        double chance = switch (roundsSinceLastMiniGame) {
+            case 1 -> 0.0003;
+            case 2 -> 0.001;
+            case 3 -> 0.01;
+            case 4 -> 0.05;
+            case 5 -> 0.09;
+            case 6 -> 0.15;
+            case 7 -> 0.20;
+            default -> roundsSinceLastMiniGame >= 8 ? 0.50 : 0.0;
+        };
+        return new Random().nextDouble() < chance;
+    }
+
+    private void triggerMiniGameSequence(MinecraftServer server) {
+        setState(GameState.PAUSED);
+        miniGameTriggeredByChance = true;
+        int alertDurationSeconds = 3;
+        
+        notify.broadcastSound(server, ModSounds.ALERT, 1.0f, 1.0f);
+        notify.broadcastBlinkingTitle(server, 
+            Component.literal("Mini Game Alert").withStyle(ChatFormatting.RED, ChatFormatting.BOLD),
+            Component.literal("Prepare for a new game!").withStyle(ChatFormatting.GRAY),
+            alertDurationSeconds
         );
+
+        gameTimer.scheduleTask((alertDurationSeconds + 3) * 20, () -> {
+            com.minigames.MiniGameManager mm = com.minigames.MiniGameManager.getInstance();
+            mm.getRegisteredGame("TicTacToe").ifPresent(game -> {
+                notify.broadcastTitle(server, 
+                    Component.literal(game.getName()).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                    Component.literal("Let's go!").withStyle(ChatFormatting.YELLOW),
+                    10, 40, 10
+                );
+                
+                gameTimer.scheduleTask(2 * 20, () -> {
+                    game.setTriggered(true);
+                    if (game instanceof com.minigames.pool.tictactoe.core.TicTacToeGame ttt) {
+                        ttt.setParticipants(new ArrayList<>(players));
+                        ttt.setLevel(server.overworld());
+                    }
+                    mm.startGame(game);
+                    roundsSinceLastMiniGame = 0;
+                });
+            });
+        });
     }
 
     public void tick(MinecraftServer server) {
+        this.server = server;
         gameTimer.tick();
         MiniGameManager.getInstance().tick();
 
@@ -282,6 +342,10 @@ public class GameManager implements MiniGameListener {
 
     public InventoryManager getInventoryManager() {
         return inventory;
+    }
+
+    public GameTimer getTimer() {
+        return gameTimer;
     }
 
     public EventResult onBlockBreak(Level level, BlockPos pos, ServerPlayer player, Object xp) {
@@ -526,5 +590,46 @@ public class GameManager implements MiniGameListener {
     public void onGameEnd(MiniGame game) {
         if (server == null) return;
         scoreboard.updateScoreboard(server);
+        
+        boolean wasTriggered = game.isTriggered() || miniGameTriggeredByChance;
+        
+        // Reset mini-game triggered state
+        game.setTriggered(false);
+        miniGameTriggeredByChance = false;
+
+        if (wasTriggered && state == GameState.PAUSED) {
+            // Restore players to arena for triggered game resumption
+            players.forEach(uuid -> {
+                ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+                if (p != null) {
+                    arena.teleportToArena(p);
+                    p.setGameMode(GameType.ADVENTURE);
+                }
+            });
+
+            // Resume the round end countdown (10 seconds)
+            setState(GameState.ROUND_END);
+            gameTimer.start(10 * 20, 
+                t -> ModEvents.TIMER_TICK.invoker().onTick(server, t), 
+                () -> nextRound(server, currentRound != null ? currentRound.getRoundNumber() + 1 : 1)
+            );
+            
+            notify.broadcastMessage(server, Component.literal("Mini-game finished! Resuming Montagsmaler...").withStyle(net.minecraft.ChatFormatting.GREEN));
+        } else {
+            // Standalone mini-game or started by command - teleport to lobby
+            players.forEach(uuid -> {
+                ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+                if (p != null) {
+                    arena.teleportToLobby(p);
+                    p.setGameMode(GameType.ADVENTURE);
+                }
+            });
+            
+            // If main game was running, stop it as mini-game by command took over
+            if (state != GameState.LOBBY) {
+                setState(GameState.LOBBY);
+                gameTimer.stop();
+            }
+        }
     }
 }
