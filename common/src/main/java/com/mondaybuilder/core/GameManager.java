@@ -51,6 +51,7 @@ public class GameManager implements MiniGameListener {
     private final ColorManager colors = new ColorManager();
 
     private GameState state = GameState.LOBBY;
+    private GameState preMiniGameState = GameState.LOBBY;
     private final List<UUID> players = new ArrayList<>();
     private final List<UUID> spectators = new ArrayList<>();
     private final Map<UUID, PlayerRole> playerRoles = new HashMap<>();
@@ -290,7 +291,11 @@ public class GameManager implements MiniGameListener {
     }
 
     public void triggerMiniGameSequence(MinecraftServer server) {
+        if (state != GameState.PAUSED) {
+            preMiniGameState = state;
+        }
         setState(GameState.PAUSED);
+        gameTimer.pause();
         miniGameTriggeredByChance = true;
         int alertDurationSeconds = 6;
         
@@ -599,21 +604,42 @@ public class GameManager implements MiniGameListener {
         miniGameTriggeredByChance = false;
 
         if (wasTriggered && state == GameState.PAUSED) {
-            // Restore players to arena for triggered game resumption
+            // Restore players to their correct positions based on pre-mini-game state
             players.forEach(uuid -> {
                 ServerPlayer p = server.getPlayerList().getPlayer(uuid);
                 if (p != null) {
-                    arena.teleportToArena(p);
-                    p.setGameMode(GameType.ADVENTURE);
+                    if (preMiniGameState == GameState.LOBBY) {
+                        arena.teleportToLobby(p);
+                        p.setGameMode(GameType.ADVENTURE);
+                    } else {
+                        // Teleport back to where they belong in the game
+                        if (uuid.equals(currentRound != null ? currentRound.getBuilder() : null)) {
+                            arena.teleportToStage(p);
+                            if (preMiniGameState == GameState.BUILDING) {
+                                p.setGameMode(GameType.CREATIVE);
+                            } else {
+                                p.setGameMode(GameType.ADVENTURE);
+                            }
+                        } else {
+                            arena.teleportToArena(p);
+                            p.setGameMode(GameType.ADVENTURE);
+                        }
+                    }
                 }
             });
 
-            // Resume the round end countdown (10 seconds)
-            setState(GameState.ROUND_END);
-            gameTimer.start(10 * 20, 
-                t -> ModEvents.TIMER_TICK.invoker().onTick(server, t), 
-                () -> nextRound(server, currentRound != null ? currentRound.getRoundNumber() + 1 : 1)
-            );
+            // Restore state and timer
+            setState(preMiniGameState);
+            if (preMiniGameState == GameState.ROUND_END) {
+                // If it was triggered at round end, start the 10s timer for the next round
+                gameTimer.start(10 * 20, 
+                    t -> ModEvents.TIMER_TICK.invoker().onTick(server, t), 
+                    () -> nextRound(server, currentRound != null ? currentRound.getRoundNumber() + 1 : 1)
+                );
+            } else if (preMiniGameState != GameState.LOBBY) {
+                // Resume the existing timer (BUILDING, SHOWING_WORD, etc.)
+                gameTimer.resume();
+            }
             
             notify.broadcastMessage(server, Component.literal("Mini-game finished! Resuming Montagsmaler...").withStyle(net.minecraft.ChatFormatting.GREEN));
         } else {

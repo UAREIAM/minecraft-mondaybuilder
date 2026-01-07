@@ -32,7 +32,10 @@ public abstract class MiniGame implements MiniGameInterface {
     public void start() {
         this.state = MiniGameState.STARTING;
         onStart();
-        this.state = MiniGameState.RUNNING;
+        // Only transition to RUNNING if onStart didn't stop or pause the game
+        if (this.state == MiniGameState.STARTING) {
+            this.state = MiniGameState.RUNNING;
+        }
     }
 
     @Override
