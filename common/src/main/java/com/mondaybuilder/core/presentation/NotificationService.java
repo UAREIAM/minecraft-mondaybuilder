@@ -68,10 +68,6 @@ public class NotificationService {
                         .append(Component.literal("R").withStyle(ChatFormatting.DARK_BLUE, ChatFormatting.BOLD));
 
                     sendTitle(player, title, null, 10, 120, 20);
-
-                    player.sendSystemMessage(parseLegacy("&7Credits"), false);
-                    player.sendSystemMessage(parseLegacy("&7Development: &dForEachItem"), false);
-                    player.sendSystemMessage(parseLegacy("&7Builder: &dmobanafe"), false);
                 }
             }
         });
@@ -118,7 +114,7 @@ public class NotificationService {
         ModEvents.TIC_TAC_TOE_WIN.register(winner -> {
             MinecraftServer server = ((ServerLevel)winner.level()).getServer();
             if (server == null) return;
-            
+
             int color = GameManager.getInstance().getPlayerColor(winner.getUUID());
             broadcastMessage(server, Component.literal(winner.getName().getString() + " won the Tic Tac Toe round!").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(color))));
 

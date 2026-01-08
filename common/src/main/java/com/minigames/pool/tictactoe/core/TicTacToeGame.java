@@ -77,10 +77,10 @@ public class TicTacToeGame extends MiniGame {
     }
 
     private void createTestPlatform() {
-        // Create 9x9 platform at -60, 50, -60
+        // Create expanded platform at -60, 50, -60 (expanded by 6 blocks each side from 9x9 to 21x21)
         BlockPos platformCenter = new BlockPos(-60, 50, -60);
-        for (int x = -4; x <= 4; x++) {
-            for (int z = -4; z <= 4; z++) {
+        for (int x = -10; x <= 10; x++) {
+            for (int z = -10; z <= 10; z++) {
                 level.setBlock(platformCenter.offset(x, 0, z), Blocks.STONE.defaultBlockState(), 3);
             }
         }
