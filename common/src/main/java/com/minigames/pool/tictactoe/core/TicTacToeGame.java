@@ -37,7 +37,7 @@ public class TicTacToeGame extends MiniGame {
     private final BlockPos[] boardPositions = new BlockPos[9];
     
     private ServerLevel level;
-    private BlockPos centerPos = new BlockPos(-60, 52, -60); // Default center for wall
+    private BlockPos centerPos = new BlockPos(-127, 15, 124); // Center of the 3x3 wall
 
     public TicTacToeGame() {
         super("TicTacToe");
@@ -46,7 +46,6 @@ public class TicTacToeGame extends MiniGame {
     @Override
     protected void onStart() {
         if (level != null) {
-            createTestPlatform();
             teleportPlayers();
         }
         resetBoard();
@@ -57,8 +56,8 @@ public class TicTacToeGame extends MiniGame {
         for (UUID uuid : totalParticipants) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
             if (player != null) {
-                // Teleport to a position facing the wall
-                player.teleportTo(level, centerPos.getX() + 0.5, centerPos.getY() - 1, centerPos.getZ() + 3, Collections.emptySet(), 180.0f, 0.0f, true);
+                // Teleport to the designated position facing the wall
+                player.teleportTo(level, -127.5, 13, 117.5, Collections.emptySet(), 0.0f, 0.0f, true);
             }
         }
     }
@@ -72,16 +71,6 @@ public class TicTacToeGame extends MiniGame {
                 } else {
                     player.setGameMode(GameType.ADVENTURE);
                 }
-            }
-        }
-    }
-
-    private void createTestPlatform() {
-        // Create expanded platform at -60, 50, -60 (expanded by 6 blocks each side from 9x9 to 21x21)
-        BlockPos platformCenter = new BlockPos(-60, 50, -60);
-        for (int x = -10; x <= 10; x++) {
-            for (int z = -10; z <= 10; z++) {
-                level.setBlock(platformCenter.offset(x, 0, z), Blocks.STONE.defaultBlockState(), 3);
             }
         }
     }
@@ -168,21 +157,13 @@ public class TicTacToeGame extends MiniGame {
     }
 
     private void restoreWorldBoard() {
-        // Restore 3x3 wall of sea lanterns with buttons
+        // Restore 3x3 wall of sea lanterns
         for (int i = 0; i < 9; i++) {
             int row = i / 3;
             int col = i % 3;
             BlockPos pos = centerPos.offset(-1 + col, -1 + row, 0);
             boardPositions[i] = pos;
             level.setBlock(pos, Blocks.SEA_LANTERN.defaultBlockState(), 3);
-            
-            // Place buttons on both sides (South and North)
-            level.setBlock(pos.south(), Blocks.OAK_BUTTON.defaultBlockState()
-                .setValue(ButtonBlock.FACE, AttachFace.WALL)
-                .setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH), 3);
-            level.setBlock(pos.north(), Blocks.OAK_BUTTON.defaultBlockState()
-                .setValue(ButtonBlock.FACE, AttachFace.WALL)
-                .setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH), 3);
         }
     }
 
@@ -226,9 +207,6 @@ public class TicTacToeGame extends MiniGame {
         BlockState state = player.getUUID().equals(activePlayer1) ? 
                 Blocks.RED_CONCRETE.defaultBlockState() : Blocks.BLUE_CONCRETE.defaultBlockState();
         level.setBlock(pos, state, 3);
-        // Remove buttons
-        level.setBlock(pos.north(), Blocks.AIR.defaultBlockState(), 3);
-        level.setBlock(pos.south(), Blocks.AIR.defaultBlockState(), 3);
     }
 
     private void switchTurn() {

@@ -49,17 +49,17 @@ public class ModConfig {
     }
 
     public static class MapConfig {
-        public Location lobby = new Location("draft:end", 0, 43, 0);
-        public Location arenaCenter = new Location("draft:end", 0, 50, 0);
-        public Location arenaLobby = new Location("draft:end", 12, 50, 12);
+        public Location lobby = new Location("minecraft:overworld", -60, 17, -25);
+        public Location arenaCenter = new Location("minecraft:overworld", -23, 10, 97);
+        public Location arenaLobby = new Location("minecraft:overworld", -38, 10, 97);
         public int arenaSize = 50;
         public int buildAreaSize = 20;
 
-        public Area joiningArea = new Area("minecraft:overworld", 39, 0, 39, 49, 0, 49);
-        public Area lobbyArea = new Area("draft:end", -9, 43, -9, 9, 47, 9);
-        public Area arenaArea = new Area("draft:end", -19, 50, -19, 19, 61, 19);
-        public Area stageArea = new Area("draft:end", -7, 50, -7, 7, 61, 7);
-        public Location stage = new Location("draft:end", 0, 50, 0);
+        public Area joiningArea = new Area("minecraft:overworld", -65, 17, -30, -55, 17, -20);
+        public Area lobbyArea = new Area("minecraft:overworld", -70, 16, -35, -51, 22, -15);
+        public Area arenaArea = new Area("minecraft:overworld", -2, 10, 76, -44, 10, 118);
+        public Area stageArea = new Area("minecraft:overworld", -15, 10, 89, -31, 21, 105);
+        public Location stage = new Location("minecraft:overworld", -23, 10, 97);
     }
 
     public static class General {

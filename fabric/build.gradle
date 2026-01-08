@@ -73,11 +73,13 @@ remapJar {
     reproducibleFileOrder = false
 }
 
-tasks.register("setupWorld", Copy) {
-    from rootProject.file("external_sources/map")
-    into "run/world"
-    // Only copy if world doesn't exist to avoid overwriting
-    outputs.upToDateWhen { file("run/world").exists() }
+loom {
+    runs {
+        server {
+            runDir "run"
+            programArgs "--world", "mondaybuilder"
+        }
+    }
 }
 
 tasks.register("updateResourcePack", Zip) {
@@ -88,10 +90,6 @@ tasks.register("updateResourcePack", Zip) {
     exclude "**/Mondaybuilder/**"
     archiveFileName = "mondaybuilder.zip"
     destinationDirectory = file("run/resourcepacks")
-}
-
-tasks.named("runServer") {
-    dependsOn "setupWorld"
 }
 
 tasks.named("runClient") {
