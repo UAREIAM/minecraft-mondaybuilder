@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:turns_20",
+  "display": {
+    "icon": {
+      "id": "minecraft:clock"
+    },
+    "title": {
+      "text": "Addicted to the Game"
+    },
+    "description": {
+      "text": "Staying 50 rounds is not enough, you need more!"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

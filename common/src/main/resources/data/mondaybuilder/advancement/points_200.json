@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:diamond"
+    },
+    "title": {
+      "text": "Unstoppable"
+    },
+    "description": {
+      "text": "Your 200 points mark has been reached!"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

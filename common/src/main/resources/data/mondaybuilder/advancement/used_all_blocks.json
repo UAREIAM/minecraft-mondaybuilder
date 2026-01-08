@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:tnt"
+    },
+    "title": {
+      "text": "Total Destruction"
+    },
+    "description": {
+      "text": "Used all building blocks in a game"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -141,6 +141,14 @@ public class GameManager implements MiniGameListener {
         scoreboard.updateScoreboard(server);
         arena.cleanupStage(server);
         
+        // Track rounds played for each player
+        for (UUID uuid : players) {
+            ServerPlayer p = server.getPlayerList().getPlayer(uuid);
+            if (p != null) {
+                scoring.incrementRoundsPlayed(p);
+            }
+        }
+        
         UUID builderUuid = selectNextBuilder(server, roundNum);
         ServerPlayer builder = server.getPlayerList().getPlayer(builderUuid);
         
@@ -374,13 +382,25 @@ public class GameManager implements MiniGameListener {
     private void handleWinner(ServerPlayer winner) {
         currentRound = currentRound.withWinnerFound();
         int totalTicks = selectedCategory.getTimerSeconds() * 20;
-        GuessContext context = new GuessContext(winner.getUUID(), gameTimer.getTicksRemaining(), totalTicks, scoring.getStreak(winner.getUUID()));
+        int currentStreak = scoring.getStreak(winner.getUUID());
+        GuessContext context = new GuessContext(winner.getUUID(), gameTimer.getTicksRemaining(), totalTicks, currentStreak);
         
         int points = scoring.calculate(context);
         scoring.addScore(winner, points);
         scoring.incrementStreak(winner.getUUID());
-        scoring.grantAdvancement(((ServerLevel)winner.level()).getServer(), winner, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "correct_guess"));
         
+        MinecraftServer server = ((ServerLevel)winner.level()).getServer();
+        scoring.grantAdvancement(server, winner, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "correct_guess"));
+        
+        // Check for streak advancements
+        int newStreak = scoring.getStreak(winner.getUUID());
+        if (newStreak >= 3) {
+            scoring.grantAdvancement(server, winner, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "streak_3"));
+        }
+        if (newStreak >= 5) {
+            scoring.grantAdvancement(server, winner, ResourceLocation.fromNamespaceAndPath(MondayBuilder.MOD_ID, "streak_5"));
+        }
+
         // Award points to builder
         ServerPlayer builder = ((ServerLevel)winner.level()).getServer().getPlayerList().getPlayer(currentRound.getBuilder());
         if (builder != null) {
@@ -407,8 +427,9 @@ public class GameManager implements MiniGameListener {
         player.setHealth(player.getMaxHealth());
         player.getFoodData().setFoodLevel(20);
 
-        // Reset score/XP on join
+        // Reset score/XP and streak on join
         scoring.resetScore(player);
+        scoring.resetStreak(player.getUUID());
 
         // BUG-2: Reset advancements on join
         scoring.resetAdvancements(((ServerLevel)player.level()).getServer(), player);
@@ -490,6 +511,17 @@ public class GameManager implements MiniGameListener {
             gameMaster = player.getUUID();
         }
 
+        // Full State Reset: Treat as if joining for the first time
+        player.removeAllEffects();
+        player.clearFire();
+        player.setHealth(player.getMaxHealth());
+        player.getFoodData().setFoodLevel(20);
+        player.getFoodData().setSaturation(20.0f);
+        player.setExperienceLevels(0);
+        player.setExperiencePoints(0);
+        player.getInventory().clearContent();
+        player.setGameMode(GameType.ADVENTURE);
+
         // Synchronize command tree for the player
         if (this.server != null) {
             this.server.getCommands().sendCommands(player);
@@ -515,6 +547,7 @@ public class GameManager implements MiniGameListener {
     public void onPlayerRespawn(ServerPlayer player) {
         player.getInventory().clearContent();
         player.setGameMode(GameType.ADVENTURE);
+        player.removeAllEffects();
         if (state == GameState.LOBBY) {
             arena.teleportToLobby(player);
         } else {

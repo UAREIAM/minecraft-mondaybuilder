@@ -1,0 +1,22 @@
+{
+  "parent": "mondaybuilder:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:clock"
+    },
+    "title": {
+      "text": "Nerdy Trick!"
+    },
+    "description": {
+      "text": "Staying for round 20 is a bit nerdy, isn't it?"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "manual": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -3,10 +3,11 @@ package com.mondaybuilder.core.mechanics;
 import com.mondaybuilder.config.ConfigManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import java.util.*;
 
 public class InventoryManager {
@@ -109,6 +110,15 @@ public class InventoryManager {
         }
         
         player.containerMenu.broadcastChanges();
+
+        // Check if inventory is empty
+        if (player.getInventory().isEmpty()) {
+            com.mondaybuilder.core.GameManager.getInstance().getScoring().grantAdvancement(
+                ((ServerLevel)player.level()).getServer(), 
+                player, 
+                ResourceLocation.fromNamespaceAndPath("mondaybuilder", "used_all_blocks")
+            );
+        }
     }
 
     private void sanitizeInventories(MinecraftServer server, List<UUID> activePlayers) {

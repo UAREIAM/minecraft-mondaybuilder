@@ -4,11 +4,13 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.*;
 
 public class ScoringSystem {
     private final Map<UUID, Integer> guessStreaks = new HashMap<>();
+    private final Map<UUID, Integer> roundsPlayed = new HashMap<>();
     private final List<AdvancementHolder> cachedModAdvancements = new ArrayList<>();
 
     private void lazyLoadAdvancements(MinecraftServer server) {
@@ -47,6 +49,22 @@ public class ScoringSystem {
 
     public void addScore(ServerPlayer player, int points) {
         player.setExperienceLevels(player.experienceLevel + points);
+        
+        if (player.experienceLevel >= 200) {
+            grantAdvancement(((ServerLevel)player.level()).getServer(), player, ResourceLocation.fromNamespaceAndPath("mondaybuilder", "points_200"));
+        }
+    }
+
+    public void incrementRoundsPlayed(ServerPlayer player) {
+        int rounds = roundsPlayed.getOrDefault(player.getUUID(), 0) + 1;
+        roundsPlayed.put(player.getUUID(), rounds);
+        
+        if (rounds >= 20) {
+            grantAdvancement(((ServerLevel)player.level()).getServer(), player, ResourceLocation.fromNamespaceAndPath("mondaybuilder", "turns_20"));
+        }
+        if (rounds >= 50) {
+            grantAdvancement(((ServerLevel)player.level()).getServer(), player, ResourceLocation.fromNamespaceAndPath("mondaybuilder", "turns_50"));
+        }
     }
 
     public int getScore(ServerPlayer player) {
@@ -72,6 +90,8 @@ public class ScoringSystem {
     }
 
     public void clearScores(MinecraftServer server) {
+        roundsPlayed.clear();
+        guessStreaks.clear();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             resetScore(player);
         }

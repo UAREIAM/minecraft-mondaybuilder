@@ -2,7 +2,7 @@
   "strings": {
     "game.starting": "The game is starting!",
     "player.joined": "%s joined the game!",
-    "welcome.master": "Welcome %s! You are the §6Game Master§a. Have fun!",
+    "welcome.master": "§aWelcome %s! You are the §6Game Master§a. Have fun!",
     "welcome.player": "Welcome %s! Have fun and enjoy the game.",
     "game.over": "Game Over!",
     "game.winner": "The winner is: %s!",
