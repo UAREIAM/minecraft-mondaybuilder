@@ -278,7 +278,8 @@ public class NotificationService {
 
     public void playSound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
         if (player == null || sound == null) return;
-        player.playNotifySound(sound, SoundSource.MASTER, volume, pitch);
+        float finalVolume = volume * ConfigManager.general.soundVolume;
+        player.playNotifySound(sound, SoundSource.MASTER, finalVolume, pitch);
     }
 
     public void broadcastSound(MinecraftServer server, SoundEvent sound, float volume, float pitch) {

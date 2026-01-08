@@ -70,6 +70,7 @@ public class ModConfig {
         public String resourcePackHash = "";
         public String resourcePackPrompt = "Please download the Monday Builder resource pack to hear the game sounds!";
         public boolean resourcePackRequired = false;
+        public float soundVolume = 1.0f;
     }
 
     public static class Items {
