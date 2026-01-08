@@ -18,6 +18,10 @@
 -   **Real-time Feedback**: Notifications in the action bar keep you updated on the remaining time and game progress.
 -   **Customizable**: Set your own player colors and manage game rounds easily.
 
+## 🔊 Audio
+
+-   **Volume Control**: You can adjust the game volume using the **MASTER** volume slider in your Minecraft sound settings.
+
 ## 🛠 Commands
 
 -   `/mb start <rounds>`: Starts the game session. The Game Master defines the number of rounds to play.
