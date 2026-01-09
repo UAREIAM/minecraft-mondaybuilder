@@ -6,7 +6,9 @@
   "client": [
   ],
   "mixins": [
-    "PickBlockMixin"
+    "PickBlockMixin",
+    "ArrowGravityMixin",
+    "CrossbowSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

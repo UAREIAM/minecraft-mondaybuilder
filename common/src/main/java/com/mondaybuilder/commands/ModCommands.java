@@ -63,6 +63,9 @@ public class ModCommands {
                 .then(Commands.literal("tictactoe")
                     .executes(context -> startTicTacToe(context.getSource()))
                 )
+                .then(Commands.literal("crazychicken")
+                    .executes(context -> startCrazyChicken(context.getSource()))
+                )
                 .then(Commands.literal("trigger")
                     .executes(context -> triggerMiniGame(context.getSource()))
                 )
@@ -162,6 +165,26 @@ public class ModCommands {
         });
 
         source.sendSuccess(() -> Component.literal("Starting Tic Tac Toe!"), true);
+        return 1;
+    }
+
+    private static int startCrazyChicken(CommandSourceStack source) {
+        GameManager gm = GameManager.getInstance();
+        if (gm.getState() != GameState.LOBBY) {
+            source.sendFailure(Component.literal("This command can only be used in the lobby!"));
+            return 0;
+        }
+
+        com.minigames.MiniGameManager mm = com.minigames.MiniGameManager.getInstance();
+        mm.getRegisteredGame("CrazyChicken").ifPresent(game -> {
+            if (game instanceof com.minigames.pool.crazychicken.core.CrazyChickenGame cc) {
+                cc.setParticipants(gm.getPlayers());
+                cc.setLevel(source.getLevel());
+            }
+            mm.startGame(game);
+        });
+
+        source.sendSuccess(() -> Component.literal("Starting Crazy Chicken!"), true);
         return 1;
     }
 

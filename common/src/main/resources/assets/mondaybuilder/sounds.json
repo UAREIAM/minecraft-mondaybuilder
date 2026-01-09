@@ -46,5 +46,29 @@
     "sounds": [
       "mondaybuilder:alert"
     ]
+  },
+  "shotgun1": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:shotgun1"
+    ]
+  },
+  "shotgun2": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:shotgun2"
+    ]
+  },
+  "shotgun3": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:shotgun3"
+    ]
+  },
+  "shotgun_reload": {
+    "category": "master",
+    "sounds": [
+      "mondaybuilder:shotgun_reload"
+    ]
   }
 }

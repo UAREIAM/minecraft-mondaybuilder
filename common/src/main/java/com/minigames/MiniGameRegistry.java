@@ -6,5 +6,6 @@ package com.minigames;
 public class MiniGameRegistry {
     public static void registerAll() {
         MiniGameManager.getInstance().registerGame(new com.minigames.pool.tictactoe.core.TicTacToeGame());
+        MiniGameManager.getInstance().registerGame(new com.minigames.pool.crazychicken.core.CrazyChickenGame());
     }
 }

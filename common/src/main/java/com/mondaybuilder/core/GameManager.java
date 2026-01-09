@@ -317,7 +317,10 @@ public class GameManager implements MiniGameListener {
 
         gameTimer.scheduleTask(alertDurationSeconds * 20, () -> {
             com.minigames.MiniGameManager mm = com.minigames.MiniGameManager.getInstance();
-            mm.getRegisteredGame("TicTacToe").ifPresent(game -> {
+            List<String> games = List.of("TicTacToe", "CrazyChicken");
+            String selectedGame = games.get(new Random().nextInt(games.size()));
+            
+            mm.getRegisteredGame(selectedGame).ifPresent(game -> {
                 notify.broadcastTitle(server, 
                     Component.literal(game.getName()).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                     Component.literal("Let's go!").withStyle(ChatFormatting.YELLOW),
@@ -329,6 +332,9 @@ public class GameManager implements MiniGameListener {
                     if (game instanceof com.minigames.pool.tictactoe.core.TicTacToeGame ttt) {
                         ttt.setParticipants(new ArrayList<>(players));
                         ttt.setLevel(server.overworld());
+                    } else if (game instanceof com.minigames.pool.crazychicken.core.CrazyChickenGame cc) {
+                        cc.setParticipants(new ArrayList<>(players));
+                        cc.setLevel(server.overworld());
                     }
                     mm.startGame(game);
                     roundsSinceLastMiniGame = 0;
@@ -356,6 +362,14 @@ public class GameManager implements MiniGameListener {
 
     public InventoryManager getInventoryManager() {
         return inventory;
+    }
+
+    public ArenaManager getArenaManager() {
+        return arena;
+    }
+
+    public ScoringSystem getScoring() {
+        return scoring;
     }
 
     public GameTimer getTimer() {
@@ -467,7 +481,6 @@ public class GameManager implements MiniGameListener {
 
     public GameState getState() { return state; }
     public RoundContext getCurrentRound() { return currentRound; }
-    public ScoringSystem getScoring() { return scoring; }
     public int getTotalRounds() { return totalRounds; }
 
     public String getCurrentWord() {

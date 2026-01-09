@@ -113,6 +113,12 @@ public class MiniGameManager {
         }
     }
 
+    public void onMobDeath(net.minecraft.world.entity.Mob mob, net.minecraft.world.damagesource.DamageSource source) {
+        if (activeGame != null) {
+            activeGame.onMobDeath(mob, source);
+        }
+    }
+
     public void tick() {
         if (activeGame != null) {
             activeGame.tick();

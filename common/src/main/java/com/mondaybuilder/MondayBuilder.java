@@ -16,6 +16,9 @@ import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,6 +62,8 @@ public final class MondayBuilder {
             if (entity instanceof ServerPlayer player) {
                 ModEvents.PLAYER_DEATH.invoker().onDeath(player);
                 GameManager.getInstance().onPlayerDeath(player);
+            } else if (entity instanceof Mob mob) {
+                com.minigames.MiniGameManager.getInstance().onMobDeath(mob, source);
             }
             return EventResult.pass();
         });
@@ -76,6 +81,14 @@ public final class MondayBuilder {
 
         EntityEvent.LIVING_HURT.register((entity, source, amount) -> {
             if (entity instanceof ServerPlayer player) {
+                // Block PvP during Crazy Chicken
+                var activeGame = com.minigames.MiniGameManager.getInstance().getActiveGame();
+                if (activeGame.isPresent() && activeGame.get() instanceof com.minigames.pool.crazychicken.core.CrazyChickenGame) {
+                    if (source.getEntity() instanceof ServerPlayer) {
+                        return EventResult.interruptFalse();
+                    }
+                }
+
                 // Only allow damage if the source is another player (PvP)
                 if (!(source.getEntity() instanceof ServerPlayer)) {
                     return EventResult.interruptFalse();
@@ -114,7 +127,25 @@ public final class MondayBuilder {
 
         InteractionEvent.RIGHT_CLICK_BLOCK.register((player, hand, pos, direction) -> {
             if (player instanceof ServerPlayer serverPlayer) {
+                var activeGame = com.minigames.MiniGameManager.getInstance().getActiveGame();
+                if (activeGame.isPresent() && activeGame.get() instanceof com.minigames.pool.crazychicken.core.CrazyChickenGame cc) {
+                    if (!cc.canUseItems(serverPlayer)) {
+                        return InteractionResult.FAIL;
+                    }
+                }
                 return GameManager.getInstance().onRightClickBlock(serverPlayer, pos);
+            }
+            return InteractionResult.PASS;
+        });
+
+        InteractionEvent.RIGHT_CLICK_ITEM.register((player, hand) -> {
+            if (player instanceof ServerPlayer serverPlayer) {
+                var activeGame = com.minigames.MiniGameManager.getInstance().getActiveGame();
+                if (activeGame.isPresent() && activeGame.get() instanceof com.minigames.pool.crazychicken.core.CrazyChickenGame cc) {
+                    if (!cc.canUseItems(serverPlayer)) {
+                        return InteractionResult.FAIL;
+                    }
+                }
             }
             return InteractionResult.PASS;
         });

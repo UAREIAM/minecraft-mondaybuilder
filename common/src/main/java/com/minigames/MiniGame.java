@@ -109,6 +109,13 @@ public abstract class MiniGame implements MiniGameInterface {
         // To be overridden by specific mini-games
     }
 
+    /**
+     * Called when a mob dies during the mini-game.
+     */
+    public void onMobDeath(net.minecraft.world.entity.Mob mob, net.minecraft.world.damagesource.DamageSource source) {
+        // To be overridden by specific mini-games
+    }
+
     // Abstract methods to be implemented by specific mini-games
     protected abstract void onStart();
     protected abstract void onPause();
