@@ -1,16 +1,16 @@
 {
-  "parent": "mondaybuilder:tictactoe_root",
+  "parent": "mondaybuilder:root",
   "display": {
     "icon": {
-      "id": "minecraft:gold_block"
+      "id": "minecraft:chicken"
     },
     "title": {
-      "text": "Big Player"
+      "text": "Crazy Chicken"
     },
     "description": {
-      "text": "Tic Tac Toe master"
+      "text": "Become a master hunter"
     },
-    "frame": "challenge",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
   },

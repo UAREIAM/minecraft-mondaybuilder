@@ -1,14 +1,14 @@
 {
-  "parent": "mondaybuilder:tictactoe_root",
+  "parent": "mondaybuilder:crazychicken_root",
   "display": {
     "icon": {
-      "id": "minecraft:gold_block"
+      "id": "minecraft:egg"
     },
     "title": {
-      "text": "Big Player"
+      "text": "Eggcellent Master"
     },
     "description": {
-      "text": "Tic Tac Toe master"
+      "text": "Earn 10000 total points"
     },
     "frame": "challenge",
     "show_toast": true,

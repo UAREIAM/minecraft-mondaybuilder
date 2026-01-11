@@ -112,7 +112,7 @@ public class ScoreManager {
     public Map<UUID, Map<EntityType<?>, Integer>> getPlayerKills() {
         return playerKills;
     }
-    
+
     public int getTotalKillsInRound() {
         int total = 0;
         for (Map<EntityType<?>, Integer> kills : roundKills.values()) {

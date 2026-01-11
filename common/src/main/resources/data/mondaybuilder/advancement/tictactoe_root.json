@@ -1,16 +1,16 @@
 {
-  "parent": "mondaybuilder:tictactoe_root",
+  "parent": "mondaybuilder:root",
   "display": {
     "icon": {
-      "id": "minecraft:gold_block"
+      "id": "minecraft:red_concrete"
     },
     "title": {
-      "text": "Big Player"
+      "text": "Tic Tac Toe"
     },
     "description": {
-      "text": "Tic Tac Toe master"
+      "text": "The classic game of X and O"
     },
-    "frame": "challenge",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
   },

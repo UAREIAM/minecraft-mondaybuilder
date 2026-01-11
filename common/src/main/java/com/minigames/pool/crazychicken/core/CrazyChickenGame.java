@@ -206,6 +206,10 @@ public class CrazyChickenGame extends MiniGame {
         return level;
     }
 
+    public ScoreManager getScoreManager() {
+        return scoreManager;
+    }
+
     private void broadcastMessage(String message) {
         if (level == null) return;
         level.getServer().getPlayerList().broadcastSystemMessage(

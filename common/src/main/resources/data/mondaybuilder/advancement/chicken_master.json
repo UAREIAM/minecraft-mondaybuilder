@@ -1,16 +1,16 @@
 {
-  "parent": "mondaybuilder:tictactoe_root",
+  "parent": "mondaybuilder:crazychicken_root",
   "display": {
     "icon": {
-      "id": "minecraft:gold_block"
+      "id": "minecraft:chicken"
     },
     "title": {
-      "text": "Big Player"
+      "text": "Chicken Master"
     },
     "description": {
-      "text": "Tic Tac Toe master"
+      "text": "Kill 20 chickens in one round"
     },
-    "frame": "challenge",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
   },

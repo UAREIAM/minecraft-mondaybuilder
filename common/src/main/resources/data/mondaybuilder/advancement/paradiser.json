@@ -1,16 +1,16 @@
 {
-  "parent": "mondaybuilder:tictactoe_root",
+  "parent": "mondaybuilder:crazychicken_root",
   "display": {
     "icon": {
-      "id": "minecraft:gold_block"
+      "id": "minecraft:feather"
     },
     "title": {
-      "text": "Big Player"
+      "text": "Paradiser"
     },
     "description": {
-      "text": "Tic Tac Toe master"
+      "text": "Kill 10 parrots in one round"
     },
-    "frame": "challenge",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
   },
