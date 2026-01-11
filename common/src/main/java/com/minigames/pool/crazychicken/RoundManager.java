@@ -80,7 +80,15 @@ public class RoundManager {
             oldest.discard();
         }
 
-        double spawnChance = activeMobs.size() < targetMobCount / 2 ? 0.6 : 0.2;
+        double fillRatio = (double) activeMobs.size() / targetMobCount;
+        double spawnChance = (double) targetMobCount / 500.0;
+
+        if (fillRatio < 0.3) {
+            spawnChance *= 2.0;
+        } else if (fillRatio > 0.8) {
+            spawnChance *= 0.5;
+        }
+
         if (activeMobs.size() < targetMobCount && random.nextFloat() < spawnChance) {
             spawnMob(currentRound);
         }
