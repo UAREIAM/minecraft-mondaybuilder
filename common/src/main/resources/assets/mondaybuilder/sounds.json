@@ -47,28 +47,22 @@
       "mondaybuilder:alert"
     ]
   },
-  "shotgun1": {
+  "ambience1": {
     "category": "master",
     "sounds": [
-      "mondaybuilder:shotgun1"
+      "mondaybuilder:ambience1"
     ]
   },
-  "shotgun2": {
+  "ambience2": {
     "category": "master",
     "sounds": [
-      "mondaybuilder:shotgun2"
+      "mondaybuilder:ambience2"
     ]
   },
-  "shotgun3": {
+  "ambience3": {
     "category": "master",
     "sounds": [
-      "mondaybuilder:shotgun3"
-    ]
-  },
-  "shotgun_reload": {
-    "category": "master",
-    "sounds": [
-      "mondaybuilder:shotgun_reload"
+      "mondaybuilder:ambience3"
     ]
   }
 }

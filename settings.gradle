@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'montagsmaler'
+rootProject.name = 'mondaybuilder'
 
 include 'common'
 include 'fabric'

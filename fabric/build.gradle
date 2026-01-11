@@ -84,7 +84,7 @@ loom {
 
 tasks.register("updateResourcePack", Zip) {
     from project(":common").sourceSets.main.resources
-    include "assets/mondaybuilder/**"
+    include "assets/**"
     include "pack.mcmeta"
     exclude "**/*.flp"
     exclude "**/Mondaybuilder/**"

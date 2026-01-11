@@ -1,0 +1,52 @@
+{
+    "item.crossbow.loading_start": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/loading_middle"
+        ]
+    },
+
+    "item.crossbow.loading_middle": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/loading_middle"
+        ]
+    },
+
+    "item.crossbow.loading_end": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/loading_middle"
+        ]
+    },
+
+    "item.crossbow.quick_charge_1": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/loading_middle"
+        ]
+    },
+
+    "item.crossbow.quick_charge_2": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/loading_middle"
+        ]
+    },
+
+    "item.crossbow.quick_charge_3": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/loading_middle"
+        ]
+    },
+
+    "item.crossbow.shoot": {
+        "replace": true,
+        "sounds": [
+            "item/crossbow/shoot1",
+            "item/crossbow/shoot2",
+            "item/crossbow/shoot3"
+        ]
+    }
+}
