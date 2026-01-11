@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.GameRules;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +47,11 @@ public class ArenaManager {
             int z = (int)((area.z1 + area.z2) / 2.0);
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withLevel(level).withSuppressedOutput(), 
                 String.format("setworldspawn %d %d %d 0", x, y, z));
-            server.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_SPAWN_RADIUS).set(0, server);
+            server.getGameRules().getRule(GameRules.RULE_SPAWN_RADIUS).set(0, server);
+            
+            // Fix time management: global noon time
+            server.overworld().setDayTime(6000);
+            server.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, server);
         }
 
         // Also ensure building world has no spawn protection issues
@@ -118,6 +123,7 @@ public class ArenaManager {
     }
 
     public void teleportToLobby(ServerPlayer player) {
+        player.getInventory().clearContent();
         teleport(player, ConfigManager.map.lobby);
     }
 
