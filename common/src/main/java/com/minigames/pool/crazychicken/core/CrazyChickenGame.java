@@ -202,6 +202,14 @@ public class CrazyChickenGame extends MiniGame {
         }
     }
 
+    public List<UUID> getParticipants() {
+        return gameManager.getTotalParticipants();
+    }
+
+    public boolean isParticipant(UUID uuid) {
+        return gameManager.getTotalParticipants().contains(uuid);
+    }
+
     public void setParticipants(List<UUID> playerUuids) {
         this.participants.clear();
         this.participants.addAll(playerUuids);
