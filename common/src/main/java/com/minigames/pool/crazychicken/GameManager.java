@@ -85,11 +85,11 @@ public class GameManager {
 
                 var enchantments = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
-                // specified enchantments: unbreaking: 100, piercing: 100, power: 100, quick_charge: 100
-                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.PIERCING), 10);
+                // specified enchantments: unbreaking: 200, piercing: 50, power: 200, quick_charge: 100
+                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.PIERCING), 50);
                 crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.POWER), 200);
                 crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.QUICK_CHARGE), 100);
-                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING), 100);
+                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING), 200);
 
                 player.getInventory().setItem(0, crossbow);
 

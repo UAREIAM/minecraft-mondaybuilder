@@ -4,6 +4,9 @@ import com.minigames.pool.crazychicken.core.CrazyChickenGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -25,11 +28,22 @@ public class RoundManager {
     private final BlockPos movingAreaMin = new BlockPos(99, 0, -89);
     private final BlockPos movingAreaMax = new BlockPos(102, 15, -55);
 
-    // Mob types
+    // Mob types and sounds
     private final EntityType<?>[] mobTypes = {
         EntityType.CHICKEN, EntityType.PARROT, EntityType.COW, EntityType.HORSE,
         EntityType.SHEEP, EntityType.PIG, EntityType.RABBIT, EntityType.BAT
     };
+
+    private final Map<EntityType<?>, SoundEvent> mobAmbientSounds = Map.of(
+        EntityType.CHICKEN, SoundEvents.CHICKEN_AMBIENT,
+        EntityType.PARROT, SoundEvents.PARROT_AMBIENT,
+        EntityType.COW, SoundEvents.COW_AMBIENT,
+        EntityType.HORSE, SoundEvents.HORSE_AMBIENT,
+        EntityType.SHEEP, SoundEvents.SHEEP_AMBIENT,
+        EntityType.PIG, SoundEvents.PIG_AMBIENT,
+        EntityType.RABBIT, SoundEvents.RABBIT_AMBIENT,
+        EntityType.BAT, SoundEvents.BAT_AMBIENT
+    );
 
     public RoundManager(CrazyChickenGame game) {
         this.game = game;
@@ -160,6 +174,14 @@ public class RoundManager {
             }
 
             mob.setPos(pos.x, newY, newZ);
+
+            // Play ambient sound randomly
+            if (random.nextFloat() < 0.001f) {
+                SoundEvent sound = mobAmbientSounds.get(mob.getType());
+                if (sound != null) {
+                    level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), sound, SoundSource.NEUTRAL, 2.0f, 0.8f + random.nextFloat() * 0.4f);
+                }
+            }
             
             if (lookAtPlayer && random.nextFloat() < 0.1) {
                 ServerPlayer target = level.getRandomPlayer();

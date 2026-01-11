@@ -107,7 +107,7 @@ public class CrazyChickenGame extends MiniGame {
                     stateManager.setInternalState(CrazyChickenState.BEFORE_ROUND, 5);
                     announceRound();
                 } else {
-                    stateManager.setInternalState(CrazyChickenState.BEFORE_GAME_END, 60);
+                    stateManager.setInternalState(CrazyChickenState.BEFORE_GAME_END, 10);
                     announceGameEnd();
                 }
             }
