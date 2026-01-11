@@ -10,6 +10,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -114,6 +116,13 @@ public class RoundManager {
         mob.setYHeadRot(initialYRot);
         mob.setXRot(0.0f);
         mob.setNoAi(true);
+
+        if (mob instanceof Bat bat) {
+            bat.setResting(false);
+        }
+        if (mob instanceof Rabbit rabbit) {
+            rabbit.setJumping(true);
+        }
 
         double baseSpeed = 1.75;
         double roundSpeedIncrease = (0.1 + random.nextDouble() * (0.275 - 0.1)) * (currentRound - 1);
