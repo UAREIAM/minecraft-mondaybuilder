@@ -18,16 +18,16 @@ public abstract class ArrowGravityMixin {
     private void onTick(CallbackInfo ci) {
         AbstractArrow arrow = (AbstractArrow) (Object) this;
         // Use ServerLevel check instead of isClientSide() to avoid field/method access issues
-        if (arrow.level() instanceof ServerLevel && arrow.getOwner() instanceof Player) {
+        if (arrow.level() instanceof ServerLevel && arrow.getOwner() instanceof Player player) {
             MiniGameManager.getInstance().getActiveGame().ifPresent(game -> {
                 if (game instanceof CrazyChickenGame) {
-                    // Increase speed by adding +3 at the start
                     if (arrow.tickCount == 0) {
-                        net.minecraft.world.phys.Vec3 movement = arrow.getDeltaMovement();
-                        double length = movement.length();
-                        if (length > 0) {
-                            arrow.setDeltaMovement(movement.scale((length + 3.0) / length));
-                        }
+                        // "Real gun" behavior: very high speed, no deviation, ignore shooter velocity
+                        net.minecraft.world.phys.Vec3 look = player.getLookAngle();
+                        arrow.setDeltaMovement(look.scale(10.0)); // High speed
+                        arrow.setYRot(player.getYRot());
+                        arrow.setXRot(player.getXRot());
+                        arrow.setNoGravity(true);
                     }
                 }
             });
@@ -40,8 +40,8 @@ public abstract class ArrowGravityMixin {
         if (arrow.level() instanceof ServerLevel && arrow.getOwner() instanceof Player) {
             MiniGameManager.getInstance().getActiveGame().ifPresent(game -> {
                 if (game instanceof CrazyChickenGame) {
-                    // Lower gravity but not zero
-                    cir.setReturnValue(0.01);
+                    // No gravity
+                    cir.setReturnValue(0.0);
                 }
             });
         }

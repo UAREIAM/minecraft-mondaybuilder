@@ -58,7 +58,7 @@ public class ScoreManager {
         Item glassPane = mobGlassMap.get(type);
         if (glassPane != null) {
             ItemStack stack = new ItemStack(glassPane);
-            // Renaming logic will be implemented in a later step
+            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, type.getDescription());
             player.getInventory().add(stack);
         }
 

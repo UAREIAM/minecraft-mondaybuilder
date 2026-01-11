@@ -70,7 +70,22 @@ public class StateManager {
 
     private void updateAllBossBars(List<UUID> participants) {
         if (level == null) return;
-        Component name = Component.literal("Crazy Chicken: " + internalState.name() + " - " + (stateTimer / 20) + "s");
+        
+        if (internalState == CrazyChickenState.AFTER_ROUND || 
+            internalState == CrazyChickenState.BEFORE_GAME_END || 
+            internalState == CrazyChickenState.GAME_END) {
+            clearBossBars();
+            return;
+        }
+
+        String stateName = switch (internalState) {
+            case JOIN -> "Preparing";
+            case BEFORE_ROUND -> "Round starting";
+            case ROUND -> "Round " + currentRound;
+            default -> internalState.name();
+        };
+
+        Component name = Component.literal(stateName + " - " + (stateTimer / 20) + "s");
         float progress = totalStateTicks > 0 ? (float) stateTimer / totalStateTicks : 0.0f;
 
         for (UUID uuid : participants) {

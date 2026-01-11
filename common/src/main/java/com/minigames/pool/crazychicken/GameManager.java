@@ -79,14 +79,17 @@ public class GameManager {
 
                 // Crossbow with enchantments
                 ItemStack crossbow = new ItemStack(net.minecraft.world.item.Items.CROSSBOW);
+                crossbow.set(DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Shotgun"));
                 crossbow.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(1.0f), List.of(), List.of(), List.of()));
+                crossbow.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
+                
                 var enchantments = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
                 
-                // specified enchantments: unbreaking: 30, piercing: 60, power: 100, quick_charge: 100
-                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.PIERCING), 60);
+                // specified enchantments: unbreaking: 100, piercing: 100, power: 100, quick_charge: 100
+                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.PIERCING), 100);
                 crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.POWER), 100);
                 crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.QUICK_CHARGE), 100);
-                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING), 30);
+                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING), 100);
 
                 player.getInventory().setItem(0, crossbow);
 
