@@ -38,7 +38,7 @@ public class GameManager {
         this.participants.addAll(initialParticipants);
         this.totalParticipants.clear();
         this.totalParticipants.addAll(initialParticipants);
-        
+
         setupMobTeam();
         teleportPlayers();
         giveEquipment();
@@ -82,12 +82,12 @@ public class GameManager {
                 crossbow.set(DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Shotgun"));
                 crossbow.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(1.0f), List.of(), List.of(), List.of()));
                 crossbow.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
-                
+
                 var enchantments = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-                
+
                 // specified enchantments: unbreaking: 100, piercing: 100, power: 100, quick_charge: 100
-                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.PIERCING), 100);
-                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.POWER), 100);
+                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.PIERCING), 10);
+                crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.POWER), 200);
                 crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.QUICK_CHARGE), 100);
                 crossbow.enchant(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING), 100);
 

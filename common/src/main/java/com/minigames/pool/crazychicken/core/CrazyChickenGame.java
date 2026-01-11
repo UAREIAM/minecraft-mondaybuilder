@@ -24,7 +24,7 @@ public class CrazyChickenGame extends MiniGame {
     private final RoundManager roundManager;
     private final ScoreManager scoreManager;
     private final StateManager stateManager;
-    
+
     private final List<UUID> participants = new ArrayList<>();
     private ServerLevel level;
     private final Random random = new Random();
@@ -46,7 +46,7 @@ public class CrazyChickenGame extends MiniGame {
         scoreManager.clearAllData();
         stateManager.setLevel(level);
         stateManager.setCurrentRound(1);
-        
+
         gameManager.initializeGame(participants);
         stateManager.setInternalState(CrazyChickenState.JOIN, 10);
     }
@@ -156,7 +156,7 @@ public class CrazyChickenGame extends MiniGame {
     private void endRound() {
         roundManager.clearMobs();
         String title = "Round " + stateManager.getCurrentRound() + " finished!";
-        
+
         for (UUID uuid : gameManager.getTotalParticipants()) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
             if (player != null) {
@@ -167,7 +167,7 @@ public class CrazyChickenGame extends MiniGame {
     }
 
     private void announceGameEnd() {
-        broadcastTitle("Game end!", "Let's view the score");
+        broadcastTitle("Mini Game end!", "Let's view the score");
         showScoreboard();
     }
 
@@ -233,7 +233,7 @@ public class CrazyChickenGame extends MiniGame {
         if (subtitle != null && !subtitle.isEmpty()) {
             player.sendSystemMessage(Component.literal(subtitle).withStyle(ChatFormatting.YELLOW));
         }
-        // In a real Fabric mod, you'd use player.sendTitle() or similar. 
+        // In a real Fabric mod, you'd use player.sendTitle() or similar.
         // For now, I'll stick to system messages but formatted as requested if I can't find a better way.
         // Actually, let's try to use the proper packets if available, but the current code used sendSystemMessage.
         // I will keep it as system messages for now but ensure both title and subtitle are sent.
