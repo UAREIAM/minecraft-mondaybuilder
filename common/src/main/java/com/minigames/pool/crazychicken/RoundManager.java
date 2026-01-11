@@ -115,7 +115,6 @@ public class RoundManager {
         mob.setYBodyRot(initialYRot);
         mob.setYHeadRot(initialYRot);
         mob.setXRot(0.0f);
-        mob.setNoAi(true);
 
         if (mob instanceof Bat bat) {
             bat.setResting(false);
@@ -123,6 +122,8 @@ public class RoundManager {
         if (mob instanceof Rabbit rabbit) {
             rabbit.setJumping(true);
         }
+
+        mob.setNoAi(true);
 
         double baseSpeed = 1.75;
         double roundSpeedIncrease = (0.1 + random.nextDouble() * (0.275 - 0.1)) * (currentRound - 1);
@@ -191,6 +192,10 @@ public class RoundManager {
             }
 
             mob.setPos(pos.x, newY, newZ);
+
+            if (mob instanceof Rabbit rabbit) {
+                rabbit.setJumping(true);
+            }
 
             // Play ambient sound randomly
             if (random.nextFloat() < 0.001f) {

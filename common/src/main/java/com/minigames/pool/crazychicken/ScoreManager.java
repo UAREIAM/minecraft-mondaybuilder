@@ -85,7 +85,7 @@ public class ScoreManager {
         com.mondaybuilder.core.GameManager.getInstance().getScoring().grantAdvancement(
             game.getLevel().getServer(),
             player,
-            ResourceLocation.fromNamespaceAndPath("mondaybuilder", "crazychicken/" + id)
+            ResourceLocation.fromNamespaceAndPath("mondaybuilder", id)
         );
     }
 
