@@ -40,5 +40,10 @@ A classic 1v1 challenge played on a vertical wall within the Minecraft world.
 -   **How to play**: Two players take turns interacting with the game board to place their symbols.
 -   **Start command**: `/mb minigame tictactoe`
 
+### Crazy Chicken
+A fast-paced hunting game inspired by the classic early 2000s game.
+-   **How to play**: Use a high-powered shotgun (crossbow) to hunt chickens, bats, and other animals. Earn points and colored glass panes for every hit!
+-   **Start command**: `/mb minigame crazychicken`
+
 ---
 *Developed for Minecraft 1.21.10 using the Architectury framework.*
