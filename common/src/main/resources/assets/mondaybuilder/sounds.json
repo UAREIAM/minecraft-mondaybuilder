@@ -50,19 +50,19 @@
   "ambience1": {
     "category": "master",
     "sounds": [
-      "mondaybuilder:ambience1"
+      "mondaybuilder:ambience/ambience_birds1"
     ]
   },
   "ambience2": {
     "category": "master",
     "sounds": [
-      "mondaybuilder:ambience2"
+      "mondaybuilder:ambience/ambience_birds2"
     ]
   },
   "ambience3": {
     "category": "master",
     "sounds": [
-      "mondaybuilder:ambience3"
+      "mondaybuilder:ambience/ambience_birds3"
     ]
   }
 }

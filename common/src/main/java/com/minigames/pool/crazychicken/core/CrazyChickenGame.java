@@ -10,12 +10,15 @@ import com.minigames.MiniGameManager;
 import com.minigames.MiniGameState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.damagesource.DamageSource;
+import com.mondaybuilder.registry.ModSounds;
 
 import java.util.*;
 
@@ -61,6 +64,9 @@ public class CrazyChickenGame extends MiniGame {
 
     @Override
     protected void onStop() {
+        if (currentAmbience != null) {
+            stopSound(currentAmbience);
+        }
         roundManager.clearMobs();
         stateManager.clearBossBars();
         gameManager.cleanup();
@@ -145,15 +151,18 @@ public class CrazyChickenGame extends MiniGame {
 
         // Play random ambience
         net.minecraft.sounds.SoundEvent[] ambientSounds = {
-            com.mondaybuilder.registry.ModSounds.AMBIENCE_1,
-            com.mondaybuilder.registry.ModSounds.AMBIENCE_2,
-            com.mondaybuilder.registry.ModSounds.AMBIENCE_3
+            ModSounds.AMBIENCE_1,
+            ModSounds.AMBIENCE_2,
+            ModSounds.AMBIENCE_3
         };
         currentAmbience = ambientSounds[random.nextInt(ambientSounds.length)];
-        broadcastSound(currentAmbience, 0.3f, 1.0f);
+        broadcastSound(currentAmbience, 0.75f, 1.0f);
     }
 
     private void endRound() {
+        if (currentAmbience != null) {
+            stopSound(currentAmbience);
+        }
         roundManager.clearMobs();
         String title = "Round " + stateManager.getCurrentRound() + " finished!";
 
@@ -244,7 +253,17 @@ public class CrazyChickenGame extends MiniGame {
         for (UUID uuid : gameManager.getTotalParticipants()) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
             if (player != null) {
-                player.playNotifySound(sound, net.minecraft.sounds.SoundSource.MASTER, volume, pitch);
+                player.playNotifySound(sound, SoundSource.MASTER, volume, pitch);
+            }
+        }
+    }
+
+    private void stopSound(net.minecraft.sounds.SoundEvent sound) {
+        if (level == null) return;
+        for (UUID uuid : gameManager.getTotalParticipants()) {
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
+            if (player != null) {
+                player.connection.send(new ClientboundStopSoundPacket(sound.location(), SoundSource.MASTER));
             }
         }
     }
