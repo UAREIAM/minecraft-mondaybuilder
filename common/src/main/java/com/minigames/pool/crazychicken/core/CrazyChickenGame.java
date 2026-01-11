@@ -42,6 +42,7 @@ public class CrazyChickenGame extends MiniGame {
     protected void onStart() {
         gameManager.setLevel(level);
         roundManager.setLevel(level);
+        roundManager.clearMobs();
         scoreManager.clearAllData();
         stateManager.setLevel(level);
         stateManager.setCurrentRound(1);
@@ -67,10 +68,16 @@ public class CrazyChickenGame extends MiniGame {
 
     @Override
     protected void onTick() {
-        stateManager.tick(gameManager.getTotalParticipants());
+        gameManager.updateParticipants();
+        if (gameManager.getParticipants().isEmpty() && stateManager.getInternalState() != CrazyChickenState.JOIN) {
+            MiniGameManager.getInstance().stopActiveGame();
+            return;
+        }
+
+        stateManager.tick(gameManager.getParticipants());
 
         if (stateManager.getInternalState() == CrazyChickenState.ROUND) {
-            roundManager.tick(stateManager.getCurrentRound(), gameManager.getTotalParticipants());
+            roundManager.tick(stateManager.getCurrentRound(), gameManager.getParticipants());
         }
     }
 
@@ -118,6 +125,7 @@ public class CrazyChickenGame extends MiniGame {
             scoreManager.trackKill(player, mob.getType());
         }
 
+        mob.discard();
         roundManager.getActiveMobs().remove(mob);
     }
 

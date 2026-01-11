@@ -98,6 +98,11 @@ public class GameManager {
         }
     }
 
+    public void updateParticipants() {
+        if (level == null) return;
+        participants.removeIf(uuid -> level.getServer().getPlayerList().getPlayer(uuid) == null);
+    }
+
     public void cleanup() {
         participants.clear();
         totalParticipants.clear();

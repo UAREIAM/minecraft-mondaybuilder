@@ -80,24 +80,36 @@ public class RoundManager {
 
         boolean fromLeft = random.nextBoolean();
         double x = (marginLeftMin.getX() + marginLeftMax.getX()) / 2.0;
-        double y = 6.0 + (random.nextDouble() * 6.0 - 2.0);
+        double y = 2.0 + random.nextDouble() * 4.0;
         double z = fromLeft ?
             marginLeftMin.getZ() + random.nextDouble() * (marginLeftMax.getZ() - marginLeftMin.getZ()) :
             marginRightMin.getZ() + random.nextDouble() * (marginRightMax.getZ() - marginRightMin.getZ());
 
         mob.setPos(x, y, z);
-        mob.setYRot(fromLeft ? 0.0f : 180.0f);
+        float initialYRot = fromLeft ? 0.0f : 180.0f;
+        mob.setYRot(initialYRot);
+        mob.setYBodyRot(initialYRot);
+        mob.setYHeadRot(initialYRot);
         mob.setXRot(0.0f);
         mob.setNoAi(true);
 
         double baseSpeed = 1.75;
         double roundSpeedIncrease = (0.1 + random.nextDouble() * (0.275 - 0.1)) * (currentRound - 1);
         double speed = (baseSpeed + random.nextDouble() * 0.5) + roundSpeedIncrease;
-        double yVelocity = 0.0;
 
         mob.addTag("cc_speed:" + speed);
-        mob.addTag("cc_y_vel:" + yVelocity);
         mob.addTag("cc_dir:" + (fromLeft ? 1 : -1));
+        
+        if (random.nextFloat() < 0.40) {
+            mob.addTag("cc_look_at:1");
+        }
+
+        if (random.nextFloat() < 0.30) {
+            mob.addTag("cc_y_mover:1");
+            mob.addTag("cc_target_y:" + (2.0 + random.nextDouble() * 4.0));
+        } else {
+            mob.addTag("cc_target_y:" + y);
+        }
 
         level.addFreshEntity(mob);
         var team = level.getScoreboard().getPlayerTeam("cc_mobs");
@@ -117,29 +129,46 @@ public class RoundManager {
             }
 
             double speed = 0;
-            double yVel = 0;
             int dir = 0;
+            boolean lookAtPlayer = false;
+            boolean yMover = false;
+            double targetY = mob.getY();
 
             for (String tag : mob.getTags()) {
                 if (tag.startsWith("cc_speed:")) speed = Double.parseDouble(tag.substring(9));
-                else if (tag.startsWith("cc_y_vel:")) yVel = Double.parseDouble(tag.substring(9));
                 else if (tag.startsWith("cc_dir:")) dir = Integer.parseInt(tag.substring(7));
+                else if (tag.equals("cc_look_at:1")) lookAtPlayer = true;
+                else if (tag.equals("cc_y_mover:1")) yMover = true;
+                else if (tag.startsWith("cc_target_y:")) targetY = Double.parseDouble(tag.substring(12));
             }
 
             Vec3 pos = mob.position();
             double newZ = pos.z + (speed / 20.0) * dir;
-            double newY = pos.y + yVel;
+            double newY = pos.y;
+
+            if (yMover) {
+                if (Math.abs(newY - targetY) < 0.1) {
+                    if (random.nextFloat() < 0.02) { 
+                        targetY = 2.0 + random.nextDouble() * 4.0;
+                        updateTag(mob, "cc_target_y:", String.valueOf(targetY));
+                    }
+                }
+                
+                double ySpeed = 0.05;
+                if (newY < targetY) newY += ySpeed;
+                else if (newY > targetY) newY -= ySpeed;
+            }
 
             mob.setPos(pos.x, newY, newZ);
-            mob.setYRot(dir > 0 ? 0.0f : 180.0f);
-            mob.setXRot(0.0f);
-
-            // 40% chance to look at player as per refined todo
-            if (random.nextFloat() < 0.40) {
+            
+            if (lookAtPlayer && random.nextFloat() < 0.1) {
                 ServerPlayer target = level.getRandomPlayer();
                 if (target != null && totalParticipants.contains(target.getUUID())) {
                     mob.lookAt(target, 30.0F, 30.0F);
                 }
+            } else {
+                mob.setYRot(dir > 0 ? 0.0f : 180.0f);
+                mob.setXRot(0.0f);
             }
 
             if (dir > 0 && newZ > marginRightMax.getZ()) {
@@ -152,8 +181,32 @@ public class RoundManager {
         }
     }
 
+    private void updateTag(Mob mob, String prefix, String newValue) {
+        mob.getTags().removeIf(tag -> tag.startsWith(prefix));
+        mob.addTag(prefix + newValue);
+    }
+
     public void clearMobs() {
         activeMobs.forEach(Mob::discard);
         activeMobs.clear();
+
+        if (level != null) {
+            clearArea(marginLeftMin, marginLeftMax);
+            clearArea(marginRightMin, marginRightMax);
+            clearArea(movingAreaMin, movingAreaMax);
+        }
+    }
+
+    private void clearArea(BlockPos min, BlockPos max) {
+        net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(
+                min.getX(), min.getY(), min.getZ(),
+                max.getX() + 1, max.getY() + 1, max.getZ() + 1
+        );
+        level.getEntitiesOfClass(Mob.class, aabb, mob -> {
+            for (EntityType<?> type : mobTypes) {
+                if (mob.getType() == type) return true;
+            }
+            return mob.getTags().stream().anyMatch(tag -> tag.startsWith("cc_"));
+        }).forEach(Mob::discard);
     }
 }
