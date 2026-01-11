@@ -110,11 +110,18 @@ public class TicTacToeGame extends MiniGame {
     private void startNextMatch() {
         clearPrefixes();
         if (participants.size() < 2) {
-            if (participants.size() == 1) {
+            if (participants.size() == 1 && totalParticipants.size() >= 2) {
                 ServerPlayer winner = level.getServer().getPlayerList().getPlayer(participants.get(0));
                 if (winner != null) {
                     level.getServer().getPlayerList().broadcastSystemMessage(
                         Component.literal(winner.getName().getString() + " is the Tic Tac Toe master!"),
+                        false
+                    );
+                }
+            } else if (totalParticipants.size() < 2) {
+                if (level != null) {
+                    level.getServer().getPlayerList().broadcastSystemMessage(
+                        Component.literal("Not enough players to start Tic Tac Toe! (Need at least 2)"),
                         false
                     );
                 }
